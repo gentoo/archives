@@ -16,6 +16,7 @@ type Message struct {
 	Attachments []Attachment
 
 	Lists []string
+	List string
 	Date  time.Time
 
 	//Search           types.ValueAppender // tsvector

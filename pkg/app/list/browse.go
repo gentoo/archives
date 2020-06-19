@@ -2,30 +2,42 @@ package list
 
 import (
 	"archives/pkg/config"
+	"archives/pkg/database"
 	"archives/pkg/models"
 	"net/http"
 )
 
 func Browse(w http.ResponseWriter, r *http.Request) {
 
-	// Count number of messages in the current mailing lists
-	var currentMailingLists []models.MailingList
-	for _, listName := range config.CurrentMailingLists() {
-		messageCount, _ := countMessages(listName)
-		currentMailingLists = append(currentMailingLists, models.MailingList{
-			Name:         listName,
-			MessageCount: messageCount,
-		})
+	var res []struct {
+		Name string
+		MessageCount int
+	}
+	err := database.DBCon.Model((*models.Message)(nil)).
+		ColumnExpr("list as name, count(*) as message_count").
+		Group("list").
+		Select(&res)
+
+	if err != nil {
+		http.NotFound(w,r)
+		return
 	}
 
-	// Count number of messages in the frozen archives
+	var currentMailingLists []models.MailingList
 	var frozenArchives []models.MailingList
-	for _, listName := range config.FrozenArchives() {
-		messageCount, _ := countMessages(listName)
-		frozenArchives = append(frozenArchives, models.MailingList{
-			Name:         listName,
-			MessageCount: messageCount,
-		})
+
+	for _, list := range res {
+		if contains(config.CurrentMailingLists(), list.Name) {
+			currentMailingLists = append(currentMailingLists, models.MailingList{
+				Name: list.Name,
+				MessageCount: list.MessageCount,
+			})
+		}else if contains(config.FrozenArchives(), list.Name) {
+			frozenArchives = append(frozenArchives, models.MailingList{
+				Name: list.Name,
+				MessageCount: list.MessageCount,
+			})
+		}
 	}
 
 	browseData := struct {
@@ -37,4 +49,14 @@ func Browse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	renderBrowseTemplate(w, browseData)
+}
+
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }

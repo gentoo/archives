@@ -28,6 +28,7 @@ func importMail(name, path, maildirPath string) {
 		Body:        getBody(m.Header, m.Body),
 		Date:        getDate(m.Header),
 		Lists:       getLists(m.Header),
+		List:        getListName(path),
 		Comment:     "",
 		Hidden:      false,
 	}
@@ -116,6 +117,12 @@ func getLists(header mail.Header) []string {
 	return lists
 }
 
+func getListName(path string) string {
+	listName := strings.ReplaceAll(path, config.MailDirPath() + ".", "")
+	listName = strings.Split(listName, "/")[0]
+	return listName
+}
+
 func insertMessage(message models.Message) error {
 	_, err := database.DBCon.Model(&message).
 		Value("tsv_subject", "to_tsvector(?)", message.GetSubject()).
@@ -127,7 +134,7 @@ func insertMessage(message models.Message) error {
 
 func isPublicList(path string) bool {
 	for _, publicList := range config.AllPublicMailingLists(){
-		if strings.HasPrefix(path, config.MailDirPath() + "." + publicList + "/") {
+		if publicList == getListName(path) {
 			return true
 		}
 	}
