@@ -53,5 +53,5 @@ include:
 variables:
   DS_DISABLE_DIND: "true"
   SAST_DISABLE_DIND: "true"
-  DAST_WEBSITE: https://archivestest.gentoo.org
+  DAST_WEBSITE: https://archives.gentoo.org
 #  DAST_FULL_SCAN_ENABLED: "true"
