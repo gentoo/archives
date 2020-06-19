@@ -76,6 +76,7 @@ func getBodyParts(body io.Reader, boundary string) map[string]string {
 		if err != nil {
 			fmt.Println("Error while reading the body:")
 			fmt.Println(err)
+			continue
 		}
 		bodyParts[p.Header.Get("Content-Type")] = string(slurp)
 	}
