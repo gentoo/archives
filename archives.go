@@ -6,6 +6,7 @@ import (
 	"archives/pkg/importer"
 	"flag"
 	"fmt"
+	"time"
 )
 
 var flagvar int
@@ -37,5 +38,5 @@ func main() {
 // TODO this has to be solved differently
 // wait for postgres to come up
 func waitForPostgres() {
-	//time.Sleep(2 * time.Second)
+	time.Sleep(4 * time.Second)
 }
