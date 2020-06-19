@@ -48,7 +48,7 @@ include:
   - template: Dependency-Scanning.gitlab-ci.yml
   - template: Container-Scanning.gitlab-ci.yml
   - template: SAST.gitlab-ci.yml
-  - template: DAST.gitlab-ci.yml
+#  - template: DAST.gitlab-ci.yml
 
 variables:
   DS_DISABLE_DIND: "true"
