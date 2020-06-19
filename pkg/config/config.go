@@ -60,7 +60,6 @@ func AllPublicMailingLists() []string {
 
 func CurrentMailingLists() []string {
 	return []string{
-		"gentoo-announce",
 		"eudev",
 		"gentoo-accessibility",
 		"gentoo-admin",
@@ -134,7 +133,6 @@ func CurrentMailingLists() []string {
 
 func FrozenArchives() []string {
 	return []string{
-		"gentoo-arm",
 		"gentoo-arm",
 		"gentoo-au",
 		"gentoo-council",
