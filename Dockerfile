@@ -15,4 +15,4 @@ COPY --from=assetsbuilder /go/src/archives/assets /go/src/archives/assets
 COPY --from=builder /go/src/archives/bin /go/src/archives/bin
 COPY --from=builder /go/src/archives/pkg /go/src/archives/pkg
 COPY --from=builder /go/src/archives/web /go/src/archives/web
-ENTRYPOINT ["/go/src/archives/bin/archives", "serve"]
+ENTRYPOINT ["/go/src/archives/bin/archives"]
