@@ -14,12 +14,12 @@ func renderPopularThreads(w http.ResponseWriter, templateData interface{}) {
 		template.Must(
 			template.New("Popular").
 				Funcs(template.FuncMap{
-					"makeMessage" : func(headers map[string][]string) models.Message {
+					"makeMessage": func(headers map[string][]string) models.Message {
 						return models.Message{
-							Headers:     headers,
+							Headers: headers,
 						}
 					},
-			}).
+				}).
 				ParseGlob("web/templates/layout/*.tmpl")).
 			ParseGlob("web/templates/popular/*.tmpl"))
 

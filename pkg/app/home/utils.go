@@ -17,9 +17,9 @@ func renderIndexTemplate(w http.ResponseWriter, templateData interface{}) {
 		template.Must(
 			template.New("Show").
 				Funcs(template.FuncMap{
-					"makeMessage" : func(headers map[string][]string) models.Message {
+					"makeMessage": func(headers map[string][]string) models.Message {
 						return models.Message{
-							Headers:     headers,
+							Headers: headers,
 						}
 					},
 				}).
