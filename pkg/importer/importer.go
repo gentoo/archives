@@ -14,7 +14,9 @@ func FullImport() {
 				return err
 			}
 			if !info.IsDir() && getDepth(path, config.MailDirPath()) >= 1 {
-				importMail(info.Name(), path, config.MailDirPath())
+				if isPublicList(path) {
+					importMail(info.Name(), path, config.MailDirPath())
+				}
 			}
 			return nil
 		})

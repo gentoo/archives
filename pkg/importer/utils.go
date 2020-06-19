@@ -1,6 +1,7 @@
 package importer
 
 import (
+	"archives/pkg/config"
 	"archives/pkg/database"
 	"archives/pkg/models"
 	"fmt"
@@ -122,4 +123,13 @@ func insertMessage(message models.Message) error {
 		OnConflict("(id) DO NOTHING").
 		Insert()
 	return err
+}
+
+func isPublicList(path string) bool {
+	for _, publicList := range config.AllPublicMailingLists(){
+		if strings.HasPrefix(path, config.MailDirPath() + "." + publicList + "/") {
+			return true
+		}
+	}
+	return false
 }
