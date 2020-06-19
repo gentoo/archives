@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+{{template "head"}}
+<body>
+{{template "header" .ListName}}
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-12 pb-4">
+          <h1 class="first-header">Gentoo Archives: {{.ListName}}</h1>
+
+          <div class="table-responsive">
+            <table class="table table-sm ag-header-table">
+              <tr>
+                <th class="ag-header-name-col">From:</th>
+                <td>{{formatAddr (.Message.GetHeaderField "From")}}</td>
+              </tr>
+              <tr>
+                <th>To:</th>
+                <td>{{formatAddr (.Message.GetHeaderField "To")}}</td>
+              </tr>
+              {{if .Message.HasHeaderField "Cc"}}
+              <tr>
+                <th>Cc:</th>
+                <td>{{formatAddr (.Message.GetHeaderField "Cc")}}</td>
+              </tr>
+              {{end}}
+
+              <tr>
+                <th>Subject:</th>
+                <td><strong>{{.Message.GetHeaderField "Subject"}}</strong></td>
+              </tr>
+              <tr>
+                <th>Date:</th>
+                <td>{{.Message.Date.Format "Mon, 2 Jan 2006 15:04:05"}}</td>
+              </tr>
+              <tr>
+                <th>Message-Id:</th>
+                <td><tt>{{.Message.GetMessageId}}</tt></td>
+              </tr>
+
+              {{if .InReplyTo}}
+              <tr>
+                <th>In Reply to:</th>
+                <td colspan="3"><a href="/{{.ListName}}/messages/{{.InReplyTo.Id}}">{{.InReplyTo.GetHeaderField "Subject"}}</a> by {{.InReplyTo.GetAuthorName}}</td>
+              </tr>
+              {{end}}
+
+            </table>
+          </div>
+
+          <pre class="ag-message-content">{{.Message.GetBody}}</pre>
+
+          {{if .Message.HasAttachments }}
+            <h3>Attachments</h3>
+
+            <div class="table-responsive">
+              <table class="table table-sm ag-attachment-table">
+                <tr>
+                  <th>File name</th>
+                  <th>MIME type</th>
+                </tr>
+
+                {{range .Message.GetAttachments}}
+                  <tr>
+                    <td>{{.Filename}}</td>
+                    <td>{{.Mime}}</td>
+                  </tr>
+                {{end}}
+              </table>
+            </div>
+          {{end}}
+
+          {{if .Replies}}
+            <div class="table-responsive">
+              <table class="table table-sm ag-replies-table">
+                <tbody><tr>
+                  <th>Subject</th>
+                  <th>Author</th>
+                </tr>
+                {{range .Replies}}
+                  <tr>
+                    <td><a href="{{.Id}}">{{.GetHeaderField "Subject"}}</a></td>
+                    <td>{{formatAddr (.GetHeaderField "From")}}</td>
+                  </tr>
+                {{end}}
+                </tbody>
+              </table>
+            </div>
+          {{end}}
+
+          <div class="ag-message-actions">
+            <a href="mailto:infra@gentoo.org?subject=Reporting mail {{.Message.Id}} on archives.g.o" class="btn btn-danger btn-sm"><span class="fa fa-fw fa-ban"></span> Report Message</a>
+            <div class="btn-group btn-group-sm ml-3">
+              <a href="https://marc.info/?i={{.Message.GetMessageId}}" class="btn btn-outline-secondary"><span class="fa fa-fw fa-share-square"></span>Find on MARC</a>
+              <a href="https://groups.google.com/forum/#!search/messageid${{.Message.GetMessageId}}" class="btn btn-outline-secondary"><span class="fa fa-fw fa-share-square"></span>Find on Google Groups</a>
+            </div>
+          </div>
+
+        </div>
+    </div>
+</div>
+
+
+{{template "footer"}}
+
+<script src="/assets/message.js"></script>
+
+</body>
+</html>

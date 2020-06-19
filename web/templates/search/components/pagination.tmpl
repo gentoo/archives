@@ -1,0 +1,44 @@
+{{define "pagination"}}
+    <nav class="pull-right">
+        <ul class="pagination ag-pager">
+            {{ if eq .CurrentPage 1}}
+            <li class="page-item disabled">
+                <a class="page-link" href="#" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            {{else}}
+            <li class="page-item">
+                <a class="page-link" href="/search?q={{.SearchQuery}}&page={{ sub .CurrentPage 1 }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            {{end}}
+            </li>
+            {{ $min := max 1 (sub .CurrentPage 3) }}
+            {{ $max := min .MaxPages (add .CurrentPage 3) }}
+            {{if gt $min 3 }}
+                <li class="page-item"><a class="page-link" href="/search?q={{.SearchQuery}}&page=1">1</a></li>
+                <li class="page-item disabled"><a class="page-link" href="#">…</a></li>
+            {{end}}
+
+            {{range (makeRange $min $max)}}
+                <li {{if eq . $.CurrentPage}}class="page-item active"{{end}}><a class="page-link" href="/search?q={{$.SearchQuery}}&page={{.}}">{{.}}</a></li>
+            {{end}}
+            {{if gt (sub .MaxPages $max) 3}}
+                <li class="page-item disabled"><a class="page-link" href="#">…</a></li>
+                <li class="page-item"><a class="page-link" href="/search?q={{.SearchQuery}}&page={{.MaxPages}}">{{.MaxPages}}</a></li>
+            {{end}}
+            {{if eq .CurrentPage .MaxPages}}
+            <li class="page-item disabled">
+                <a class="page-link" href="#" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+                {{else}}
+            <li class="page-item">
+                <a class="page-link" href="/search?q={{.SearchQuery}}&page={{ add .CurrentPage 1 }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+                {{end}}
+            </li>
+        </ul>
+    </nav>
+{{end}}

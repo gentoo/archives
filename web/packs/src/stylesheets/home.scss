@@ -1,0 +1,38 @@
+.site-welcome {
+  font-size: 3.5em;
+  text-align: center;
+  margin-bottom: 0.75em;
+
+  @media screen and (max-width: 767px) {
+    font-size: 1.75em;
+  }
+}
+
+#landing-page-search-area {
+  height: calc(100vh - 100px);
+}
+
+#landing-page-search-area > .jumbotron {
+  margin-top: calc(15vh - 75px);
+}
+
+#landing-page-popular-threads {
+  margin-top: 15vh;
+}
+
+#scroll-down-section {
+  /*margin-top: calc(35vh - 100px);*/
+  position: absolute;
+  left: calc(50vw - 18px);
+  bottom: 25px;
+
+}
+
+#scroll-down-section > i {
+  font-size: 400%;
+  cursor: pointer;
+}
+
+#scroll-down-section > i:hover {
+  color: #54487A!important;
+}

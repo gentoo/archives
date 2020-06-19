@@ -1,0 +1,15 @@
+@import "~highlight.js/styles/default";
+
+.hljs {
+  background: #F5F5F5!important;
+  padding: 0px!important;
+  color: #212529!important;
+}
+
+.hljs-addition, .highlight-git-add {
+  color: green!important;
+}
+
+.hljs-deletion, .highlight-git-del {
+  color: red!important;
+}

@@ -1,0 +1,108 @@
+html {
+  scroll-behavior: smooth;
+}
+
+html.turbolinks-progress-bar::before {
+  background-color: #54487A!important;
+}
+
+.ag-text-content {
+  width: 100%;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .ag-message-table,
+  .ag-mostrecent-table {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .ag-mostrecent-table td,
+  .ag-message-table td {
+    text-overflow: ellipsis;
+    max-height: 1.2em;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .ag-message-table-date {
+    width: 18%;
+  }
+
+  .ag-message-table-from {
+    width: 22%;
+  }
+
+  .ag-mostrecent-table-author {
+    width: 30%;
+  }
+
+  .ag-mostrecent-header {
+    margin-top: 5px;
+  }
+
+  .ag-index-actions {
+    margin-top: 2em;
+  }
+}
+
+.ag-quote {
+  color: #999;
+  cursor: row-resize;
+  margin-bottom: -1em;
+  overflow: hidden;
+}
+
+.ag-quote-hidden {
+  height: 2.4em;
+  overflow: hidden;
+  fdisplay: block;
+  -webkit-mask-image: linear-gradient(to bottom, white, transparent);
+  mask-image: linear-gradient(to bottom, white, transparent);
+}
+
+.ag-toggle-quotes {
+  float: right;
+  margin-bottom: .5em;
+}
+
+.ag-message-content {
+  clear: both;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
+.ag-message-content pre {
+  border: none;
+}
+
+.ag-message-content blockquote {
+  font-size: inherit;
+}
+
+.ag-header-name-col {
+  width: 10em;
+}
+
+.ag-message-actions {
+  line-height: 2em;
+}
+
+.ag-pager {
+  margin: 0;
+}
+
+.ag-html-content {
+  white-space: normal;
+}
+
+.ag-view-selection {
+  margin-bottom: .5em;
+}
+
+.ag-date {
+}

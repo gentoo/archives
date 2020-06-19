@@ -1,0 +1,51 @@
+version: '3.2'
+
+services:
+  http-serving:
+    image: ${ARCHIVES_IMAGE:-gentoo/archives:latest}
+    volumes:
+      - type: "bind"
+        source: "/var/log/archives"
+        target: "/var/log/archives"
+    ports:
+      - 127.0.0.1:5000:5000
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    restart: always
+    environment:
+      ARCHIVES_LOG_FILE: '/var/log/archives/web.log'
+    depends_on:
+      - db
+  updater:
+    image: ${ARCHIVES_IMAGE:-gentoo/archives:latest}
+    volumes:
+      - type: "bind"
+        source: "/var/archives/.maildir"
+        target: "/var/archives/.maildir"
+        read_only: true
+      - type: "bind"
+        source: "/var/log/archives"
+        target: "/var/log/archives"
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    environment:
+      ARCHIVES_LOG_FILE: '/var/log/archives/updater.log'
+    depends_on:
+      - db
+  db:
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_USER: ${ARCHIVES_POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${ARCHIVES_POSTGRES_PASSWORD:-root}
+      POSTGRES_DB: ${ARCHIVES_POSTGRES_DB:-archives}
+    shm_size: 512mb
+    volumes:
+      - ${ARCHIVES_POSTGRES_DATA_PATH:-/var/lib/postgresql/data}:/var/lib/postgresql/data
+  watchtower:
+    image: containrrr/watchtower:0.3.10
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json
+    command: --label-enable

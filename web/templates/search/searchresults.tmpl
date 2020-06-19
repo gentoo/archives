@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+{{template "head"}}
+<body>
+{{template "header" "search"}}
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-12 pb-4">
+          <h1 class="first-header">Search Results <small>{{.SearchQuery}}</small></h1>
+
+          <div class="d-none d-sm-block">
+            {{template "pagination" . }}
+          </div>
+
+          <div class="btn-group ag-view-selection" role="group" aria-label="Message view selection">
+            <a href="/search?q={{.SearchQuery}}&page={{.CurrentPage}}&threads=true" class="btn {{if .ShowThreads}}btn-primary{{else}}btn-outline-secondary{{end}}">Threads</a>
+            <a href="/search?q={{.SearchQuery}}&page={{.CurrentPage}}" class="btn {{if not .ShowThreads}}btn-primary{{else}}btn-outline-secondary{{end}}">Messages</a>
+          </div>
+
+          <div class="table-responsive mt-5">
+            <table class="table table-sm table-hover ag-message-table">
+              <tr>
+                <th class="ag-message-table-subject">Subject</th>
+                <th class="ag-message-table-from">From</th>
+                <th class="ag-message-table-date">Date</th>
+              </tr>
+
+                {{range .Messages}}
+                <tr>
+                  <td><a href="/{{.GetListNameFromSubject}}/message/{{.Id}}">{{.GetHeaderField "Subject"}}</a></td>
+                  <td>{{.GetAuthorName}}</td>
+                  <td><span class="ag-date">{{.Date.Format "Mon, 2 Jan 2006 15:04:05"}}</span></td>
+                </tr>
+                {{end}}
+
+            </table>
+          </div>
+
+          <div class="row">
+            <div class="col-6">
+              Showing {{add (mul (sub .CurrentPage 1) 50) 1}} to {{min (mul .CurrentPage 50) .SearchResultsCount}} of {{.SearchResultsCount}} entries
+            </div>
+            <div class="col-6">
+              {{template "pagination" . }}
+            </div>
+          </div>
+
+        </div>
+    </div>
+</div>
+
+
+{{template "footer"}}
+
+</body>
+</html>

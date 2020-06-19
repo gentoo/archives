@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+{{template "head"}}
+<body>
+{{template "header" "home"}}
+
+<div id="scroll-down-section" class="text-muted" style="z-index: 9999;">
+    <br/><br/>
+    <i onclick="document.getElementById('lists-section').scrollIntoView(true);" class="fa fa-angle-down" aria-hidden="true"></i>
+</div>
+
+<div class="container mb-5">
+    <div class="row">
+        <div id="landing-page-search-area" class="col-12 px-5">
+
+            <div class="jumbotron w-100 px-5" style="background-color: #FAFAFA;">
+                <h2 class="site-welcome stick-top">Welcome to the Home<br/> of <span class="text-primary"> 1,111,111 </span> Gentoo Related Mails</h2>
+
+                <form action="/search" method="get">
+                    <div class="typeahead-container">
+                        <div class="typeahead-field">
+                        <span class="typeahead-query">
+                          <input id="q" name="q" type="search" autocomplete="off" placeholder="Find Mails" aria-label="Find Mails" autofocus="">
+                        </span>
+
+                            <span class="typeahead-button">
+                              <button type="button" onclick="$('#searchHelp').modal('show')" title="Search for Threads only" aria-label="Search for Threads only">
+                                <span class="fa fa-comments-o" style="font-size: 15px;"></span><span class="sr-only">Search for Threads only</span>
+                                        </button>
+                            </span>
+                            <span class="typeahead-button">
+                              <button type="submit" title="Find" aria-label="Find">
+                                <span class="typeahead-search-icon"></span><span class="sr-only">Find</span>
+                              </button>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+                <br>
+                <small class="mt-4 text-muted" style="font-size: 12px;">This is the new archives.gentoo.org site. If anything isn't working as expected, <a href="mailto:infra@gentoo.org">contact us</a>.<br>
+                    You can search by <a href="/search?q=gentoo-dev">mailing list</a>, <a href="/search?q=Last+rites">author</a>, <a href="/search?q=Last+rites">subject</a> or <a href="/search?q=File+transfer+program+to+keep+remote+files+into+sync">message body</a>. Results similar to your query will be found as well.</small>
+            </div>
+
+            <div id="landing-page-popular-threads" class="mx-5 text-muted">
+                <div class="mx-auto text-center">
+                    <p class="mb-1"><a class="text-muted" href="/popular"><b>Recent Popular Threads</b></a></p>
+                    {{range .PopularThreads}}
+                    <p class="mb-1"><a href="/{{(makeMessage .Headers).GetListNameFromSubject}}/message/{{.Id}}" class="text-muted">{{(makeMessage .Headers).GetHeaderField "Subject"}}</a></p>
+                    {{end}}
+                </div>
+            </div>
+
+        </div>
+
+        <div id="lists-section" class="col-12 pt-3">
+            <p class="lead">
+              Here you can find the archives of our most important mailing lists.
+            </p>
+            <p>
+              For a complete list of available archives, see the <a href="/lists" class="btn btn-primary btn-sm px-1 py-0"><i class="fa fa-fw fa-archive"></i> All Archives</a> section.
+            </p>
+        </div>
+
+        <div class="col-12">
+            {{range .MailingLists}}
+                <hr/>
+                <div class="row">
+                    <div class="col-12 col-md-4">
+                        <h2 class="stick-top">{{.Name}}</h2>
+                        <p>
+                            <tt>{{.Name}}</tt> {{.Description}}.
+                        </p>
+                        <p class="ag-index-actions">
+                            <a class="btn btn-primary btn-block" href="/{{.Name}}/threads/{{ $.CurrentMonth}}/"><span class="fa fa-fw fa-inbox"></span> This Month's Archives</a>
+                            <a class="btn btn-outline-secondary text-dark btn-block" href="/{{.Name}}/"><span class="fa fa-fw fa-inbox"></span> Complete Archives</a>
+                        </p>
+                    </div>
+                    <div class="col-12 col-md-8">
+                        <h3 class="ag-mostrecent-header">Most recent messages</h3>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover ag-mostrecent-table">
+                                <tbody>
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th class="ag-mostrecent-table-author">Author</th>
+                                    </tr>
+                                    {{$listName:=.Name}}
+                                    {{range .Messages}}
+                                        <tr>
+                                            <td><a href="/{{$listName}}/message/{{.Id}}">{{.GetHeaderField "Subject"}}</a></td>
+                                            <td>{{.GetAuthorName}}</td>
+                                        </tr>
+                                    {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {{end}}
+
+            <hr/>
+            <h2>Other Lists</h2>
+            <p>
+                All other archives are available here: <a href="/lists" class="btn btn-primary"><i class="fa fa-fw fa-archive"></i> All Archives</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+
+{{template "footer"}}
+
+<script src="/assets/index.js"></script>
+
+</body>
+</html>
