@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"mime/multipart"
 	"net/mail"
 	"os"
@@ -75,7 +74,8 @@ func getBodyParts(body io.Reader, boundary string) map[string]string {
 		}
 		slurp, err := ioutil.ReadAll(p)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println("Error while reading the body:")
+			fmt.Println(err)
 		}
 		bodyParts[p.Header.Get("Content-Type")] = string(slurp)
 	}
