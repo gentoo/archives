@@ -21,12 +21,18 @@ func main() {
 
 	// main part
 
-	fullImport := flag.Bool("fullimport", false, "Start a full import, importing all mails")
+	fullImport := flag.Bool("full-import", false, "Start a full import, importing all mails")
+	incrementalImport := flag.Bool("incremental-import", false, "Start a incremental import, importing only new mails")
 	serve := flag.Bool("serve", false, "Start serving the web application")
+
 	flag.Parse()
 
 	if *fullImport {
 		importer.FullImport()
+	}
+
+	if *incrementalImport {
+		importer.IncrementalImport()
 	}
 
 	if *serve {

@@ -4,9 +4,11 @@ import (
 	"archives/pkg/config"
 	"archives/pkg/database"
 	"archives/pkg/models"
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/mail"
 	"os"
@@ -31,8 +33,16 @@ func initImport(path string, info os.FileInfo, err error) error {
 	}
 	if !info.IsDir() && getDepth(path, config.MailDirPath()) >= 1 && isPublicList(path) {
 
-		file, _ := os.Open(path)
-		m, _ := mail.ReadMessage(file)
+		file, err := os.Open(path)
+		defer file.Close()
+		if err != nil {
+			return err
+		}
+
+		m, err := mail.ReadMessage(file)
+		if err != nil {
+			return err
+		}
 
 		mails = append(mails, &models.Message{
 			Id:           m.Header.Get("X-Archives-Hash"),
@@ -47,49 +57,56 @@ func initImport(path string, info os.FileInfo, err error) error {
 }
 
 // TODO
-func importMail(path string, info os.FileInfo, err error) error {
+func importMail(path, filename string) error {
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	r := bytes.NewReader(content)
+	m, err := mail.ReadMessage(r)
 	if err != nil {
 		return err
 	}
-	if !info.IsDir() && getDepth(path, config.MailDirPath()) >= 1 && isPublicList(path) {
-		file, _ := os.Open(path)
-		m, _ := mail.ReadMessage(file)
 
-		msg := models.Message{
-			Id:          m.Header.Get("X-Archives-Hash"),
-			MessageId:   m.Header.Get("Message-Id"),
-			Filename:    info.Name(),
-			From:        m.Header.Get("From"),
-			To:          strings.Split(m.Header.Get("To"), ","),
-			Cc:          strings.Split(m.Header.Get("Cc"), ","),
-			Subject:     m.Header.Get("Subject"),
+	go importIntoDatabase(path, filename, m)
 
-			List:        getListName(path),
-
-			// TODO
-			Date:        getDate(m.Header),
-			InReplyToId:   getInReplyToMail(m.Header.Get("In-Reply-To"), m.Header.Get("From")),
-			//References:  getReferencesToMail(strings.Split(m.Header.Get("References"), ","), m.Header.Get("From")),
-			Body:        getBody(m.Header, m.Body),
-			Attachments: getAttachments(m.Header, m.Body),
-
-			StartsThread: m.Header.Get("In-Reply-To") == "" && m.Header.Get("References") == "",
-
-			Comment:     "",
-			Hidden:      false,
-		}
-
-		err := insertMessage(msg)
-
-		if err != nil {
-			fmt.Println("Error during importing Mail")
-			fmt.Println(err)
-		}
-
-		insertReferencesToMail(strings.Split(m.Header.Get("References"), ","), m.Header.Get("X-Archives-Hash"), m.Header.Get("From"))
-
-	}
 	return nil
+}
+
+func importIntoDatabase(path, filename string, m *mail.Message) {
+	msg := models.Message{
+		Id:          m.Header.Get("X-Archives-Hash"),
+		MessageId:   m.Header.Get("Message-Id"),
+		Filename:    filename,
+		From:        m.Header.Get("From"),
+		To:          strings.Split(m.Header.Get("To"), ","),
+		Cc:          strings.Split(m.Header.Get("Cc"), ","),
+		Subject:     m.Header.Get("Subject"),
+
+		List:        getListName(path),
+
+		// TODO
+		Date:        getDate(m.Header),
+		InReplyToId:   getInReplyToMail(m.Header.Get("In-Reply-To"), m.Header.Get("From")),
+		//References:  getReferencesToMail(strings.Split(m.Header.Get("References"), ","), m.Header.Get("From")),
+		Body:        getBody(m.Header, m.Body),
+		Attachments: getAttachments(m.Header, m.Body),
+
+		StartsThread: m.Header.Get("In-Reply-To") == "" && m.Header.Get("References") == "",
+
+		Comment:     "",
+		Hidden:      false,
+	}
+
+	err := insertMessage(msg)
+	if err != nil {
+		fmt.Println("Error during importing Mail")
+		fmt.Println(err)
+	}
+
+	insertReferencesToMail(strings.Split(m.Header.Get("References"), ","), m.Header.Get("X-Archives-Hash"), m.Header.Get("From"))
+
 }
 
 func getInReplyToMail(messageId, from string) string {

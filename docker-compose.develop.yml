@@ -13,7 +13,8 @@ services:
       LANG: en_US.UTF-8
       LANGUAGE: en_US:en
       LC_ALL: en_US.UTF-8
-    shm_size: 512mb
+    shm_size: 1024mb
+    command: postgres -c 'shared_buffers=512MB' -c 'max_connections=1000'
     volumes:
       - pgdata:/var/lib/postgresql/data
   pgadmin:
