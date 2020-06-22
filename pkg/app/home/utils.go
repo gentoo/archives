@@ -19,7 +19,7 @@ func renderIndexTemplate(w http.ResponseWriter, templateData interface{}) {
 				Funcs(template.FuncMap{
 					"makeMessage": func(headers map[string][]string) models.Message {
 						return models.Message{
-							Headers: headers,
+							//Headers: headers,
 						}
 					},
 				}).
@@ -35,7 +35,7 @@ func getAllMessagesCount() int {
 	var messsageCount int
 	database.DBCon.Model((*models.Message)(nil)).QueryOne(pg.Scan(&messsageCount), `
 		SELECT
-			count(DISTINCT messages.headers->>'Message-Id')
+			count(DISTINCT messages.message_id)
 		FROM
 			messages;
 	`)

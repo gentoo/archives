@@ -21,17 +21,17 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		var messages []*models.Message
 		database.DBCon.Model(&messages).
 			WhereGroup(func(q *orm.Query) (*orm.Query, error) {
-				q = q.WhereOr(`(headers::jsonb->>'Subject')::jsonb->>0 LIKE '[` + mailingList[0] + `]%'`).
-					WhereOr(`(headers::jsonb->>'Subject')::jsonb->>0 LIKE 'Re: [` + mailingList[0] + `]%'`)
+				q = q.WhereOr(`subject LIKE '[` + mailingList[0] + `]%'`).
+					WhereOr(`subject LIKE 'Re: [` + mailingList[0] + `]%'`)
 				return q, nil
 			}).
-			WhereGroup(func(q *orm.Query) (*orm.Query, error) {
-				q = q.WhereOr(`headers::jsonb->>'To' LIKE '%` + mailingList[0] + `@lists.gentoo.org%'`).
-					WhereOr(`headers::jsonb->>'Cc' LIKE '%` + mailingList[0] + `@lists.gentoo.org%'`).
-					WhereOr(`headers::jsonb->>'To' LIKE '%` + mailingList[0] + `@gentoo.org%'`).
-					WhereOr(`headers::jsonb->>'Cc' LIKE '%` + mailingList[0] + `@gentoo.org%'`)
-				return q, nil
-			}).
+			//WhereGroup(func(q *orm.Query) (*orm.Query, error) {
+			//	q = q.WhereOr(`headers::jsonb->>'To' LIKE '%` + mailingList[0] + `@lists.gentoo.org%'`).
+			//		WhereOr(`headers::jsonb->>'Cc' LIKE '%` + mailingList[0] + `@lists.gentoo.org%'`).
+			//		WhereOr(`headers::jsonb->>'To' LIKE '%` + mailingList[0] + `@gentoo.org%'`).
+			//		WhereOr(`headers::jsonb->>'Cc' LIKE '%` + mailingList[0] + `@gentoo.org%'`)
+			//	return q, nil
+			//}).
 			Order("date DESC").
 			Limit(5).
 			Select()
@@ -57,7 +57,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	templateData := struct {
 		MailingLists   []models.MailingList
-		PopularThreads models.Threads
+		PopularThreads []*models.Message
 		MessageCount   string
 		CurrentMonth   string
 	}{

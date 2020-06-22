@@ -13,22 +13,22 @@
             <table class="table table-sm ag-header-table">
               <tr>
                 <th class="ag-header-name-col">From:</th>
-                <td>{{formatAddr (.Message.GetHeaderField "From")}}</td>
+                <td>{{formatAddr (.Message.From)}}</td>
               </tr>
               <tr>
                 <th>To:</th>
-                <td>{{formatAddr (.Message.GetHeaderField "To")}}</td>
+                <td>{{formatAddrList (.Message.To)}}</td>
               </tr>
-              {{if .Message.HasHeaderField "Cc"}}
+              {{if .Message.Cc}}
               <tr>
                 <th>Cc:</th>
-                <td>{{formatAddr (.Message.GetHeaderField "Cc")}}</td>
+                <td>{{formatAddrList (.Message.Cc)}}</td>
               </tr>
               {{end}}
 
               <tr>
                 <th>Subject:</th>
-                <td><strong>{{.Message.GetHeaderField "Subject"}}</strong></td>
+                <td><strong>{{.Message.Subject}}</strong></td>
               </tr>
               <tr>
                 <th>Date:</th>
@@ -49,9 +49,9 @@
             </table>
           </div>
 
-          <pre class="ag-message-content">{{.Message.GetBody}}</pre>
+          <pre class="ag-message-content">{{.Message.Body}}</pre>
 
-          {{if .Message.HasAttachments }}
+          {{if .Message.Attachments }}
             <h3>Attachments</h3>
 
             <div class="table-responsive">
@@ -61,7 +61,7 @@
                   <th>MIME type</th>
                 </tr>
 
-                {{range .Message.GetAttachments}}
+                {{range .Message.Attachments}}
                   <tr>
                     <td>{{.Filename}}</td>
                     <td>{{.Mime}}</td>

@@ -1,7 +1,6 @@
 package models
 
 import (
-	"mime"
 	"net/mail"
 	"strings"
 	"time"
@@ -9,23 +8,35 @@ import (
 
 type Message struct {
 	Id       string `pg:",pk"`
+	MessageId string
 	Filename string
 
-	Headers     map[string][]string
-	Body        map[string]string
+	List string
+
+	From string
+	To []string
+	Cc []string
+
+	Subject string
+	Body string
+
+	Date time.Time
+
+	// fk
+	InReplyTo *Message `pg:"fk:in_reply_to_id"` // fk specifies foreign key
+	InReplyToId string
+
+	// many to many
+	//References []string
+	References []Message `pg:"many2many:message_to_references,joinFK:reference_id"`
+
 	Attachments []Attachment
 
-	Lists []string
-	List string
-	Date  time.Time
-
-	//Search           types.ValueAppender // tsvector
+	StartsThread bool
 
 	Comment string
 	Hidden  bool
 
-	//ParentId         string
-	//Parent           Message -> pg fk?
 }
 
 type Header struct {
@@ -44,12 +55,13 @@ type Attachment struct {
 	Content  string
 }
 
-func (m Message) GetSubject() string {
-	return m.GetHeaderField("Subject")
+type MessageToReferences struct {
+	MessageId string
+	ReferenceId  string
 }
 
 func (m Message) GetListNameFromSubject() string {
-	subject := m.GetSubject()
+	subject := m.Subject
 	listName := strings.Split(subject, "]")[0]
 	listName = strings.ReplaceAll(listName, "[", "")
 	listName = strings.ReplaceAll(listName, "Re:", "")
@@ -58,7 +70,7 @@ func (m Message) GetListNameFromSubject() string {
 }
 
 func (m Message) GetAuthorName() string {
-	addr, err := mail.ParseAddress(m.GetHeaderField("From"))
+	addr, err := mail.ParseAddress(m.From)
 	if err != nil {
 		return ""
 	}
@@ -66,7 +78,7 @@ func (m Message) GetAuthorName() string {
 }
 
 func (m Message) GetMessageId() string {
-	messageId := m.GetHeaderField("Message-Id")
+	messageId := m.MessageId
 	messageId = strings.ReplaceAll(messageId, "<", "")
 	messageId = strings.ReplaceAll(messageId, ">", "")
 	messageId = strings.ReplaceAll(messageId, "\"", "")
@@ -74,83 +86,11 @@ func (m Message) GetMessageId() string {
 }
 
 func (m Message) GetInReplyTo() string {
-	inReplyTo := m.GetHeaderField("In-Reply-To")
+	inReplyTo := m.InReplyTo.MessageId
 	inReplyTo = strings.ReplaceAll(inReplyTo, "<", "")
 	inReplyTo = strings.ReplaceAll(inReplyTo, ">", "")
 	inReplyTo = strings.ReplaceAll(inReplyTo, " ", "")
 	return inReplyTo
 }
 
-func (m Message) GetHeaderField(key string) string {
-	subject, found := m.Headers[key]
-	if !found {
-		return ""
-	}
-	header := strings.Join(subject, " ")
-	if strings.Contains(header, "=?") {
-		dec := new(mime.WordDecoder)
-		decodedHeader, err := dec.DecodeHeader(header)
-		if err != nil {
-			return ""
-		}
-		return decodedHeader
-	}
-	return header
-}
 
-func (m Message) HasHeaderField(key string) bool {
-	_, found := m.Headers[key]
-	return found
-}
-
-func (m Message) GetBody() string {
-	// Get text/plain body
-	for contentType, content := range m.Body {
-		if strings.Contains(contentType, "text/plain") {
-			return content
-		}
-	}
-
-	// If text/plain is not present, fall back to html
-	for contentType, content := range m.Body {
-		if strings.Contains(contentType, "text/html") {
-			return content
-		}
-	}
-
-	// If neither text/plain nor text/html is available return nothing
-	return ""
-}
-
-func (m Message) HasAttachments() bool {
-	for key, _ := range m.Body {
-		if !(strings.Contains(key, "text/plain") || strings.Contains(key, "text/plain")) {
-			return true
-		}
-	}
-	return false
-}
-
-func (m Message) GetAttachments() []Attachment {
-	var attachments []Attachment
-	for key, content := range m.Body {
-		if !(strings.Contains(key, "text/plain") || strings.Contains(key, "text/plain")) {
-			attachments = append(attachments, Attachment{
-				Filename: getAttachmentFileName(key),
-				Mime:     strings.Split(key, ";")[0],
-				Content:  content,
-			})
-		}
-	}
-	return attachments
-}
-
-// utility methods
-
-func getAttachmentFileName(contentTypeHeader string) string {
-	parts := strings.Split(contentTypeHeader, "name=")
-	if len(parts) < 2 {
-		return "unknown"
-	}
-	return strings.ReplaceAll(parts[1], "\"", "")
-}

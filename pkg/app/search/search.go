@@ -44,10 +44,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	//
 	var searchResults []*models.Message
 	query := database.DBCon.Model(&searchResults).
-		WhereOr(`headers::jsonb->>'From' LIKE ?`, "%"+searchTerm+"%").
+		WhereOr(`message.from LIKE ?`, "%"+searchTerm+"%").
 		Order("date DESC")
 	if showThreads {
-		query = query.Where(`NOT headers::jsonb ? 'References'`).Where(`NOT headers::jsonb ? 'In-Reply-To'`)
+		query = query.Where(`starts_thread = TRUE`)
 	}
 
 	messagesCount, _ := query.Count()
@@ -65,7 +65,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	query = database.DBCon.Model(&searchResults).
 		Where(`tsv_subject @@ to_tsquery(''?'')`, searchTerm)
 	if showThreads {
-		query = query.Where(`NOT headers::jsonb ? 'References'`).Where(`NOT headers::jsonb ? 'In-Reply-To'`)
+		query = query.Where(`starts_thread = TRUE`)
 	}
 
 	messagesCount, _ = query.Count()
@@ -83,7 +83,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	query = database.DBCon.Model(&searchResults).
 		Where(`tsv_body @@ to_tsquery(''?'')`, searchTerm)
 	if showThreads {
-		query = query.Where(`NOT headers::jsonb ? 'References'`).Where(`NOT headers::jsonb ? 'In-Reply-To'`)
+		query = query.Where(`starts_thread = TRUE`)
 	}
 
 	messagesCount, _ = query.Count()

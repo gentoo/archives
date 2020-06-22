@@ -26,9 +26,9 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	var inReplyTos []*models.Message
 	var inReplyTo *models.Message
-	if message.HasHeaderField("In-Reply-To") {
+	if message.InReplyTo != nil {
 		err = database.DBCon.Model(&inReplyTos).
-			Where(`(headers::jsonb->>'Message-Id')::jsonb ? '` + message.GetHeaderField("In-Reply-To") + `'`).
+			Where(`(headers::jsonb->>'Message-Id')::jsonb ? '` + message.InReplyTo.Id + `'`).
 			Select()
 		if err != nil || len(inReplyTos) < 1 {
 			inReplyTo = nil
@@ -41,8 +41,8 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	var replies []*models.Message
 	database.DBCon.Model(&replies).
-		Where(`(headers::jsonb->>'References')::jsonb ? '` + message.GetHeaderField("Message-Id") + `'`).
-		WhereOr(`(headers::jsonb->>'In-Reply-To')::jsonb ? '` + message.GetHeaderField("Message-Id") + `'`).
+		Where(`(headers::jsonb->>'References')::jsonb ? '` + message.Id + `'`).
+		WhereOr(`(headers::jsonb->>'In-Reply-To')::jsonb ? '` + message.Id + `'`).
 		Order("date ASC").Select()
 
 	renderMessageTemplate(w, listName, message, inReplyTo, replies)

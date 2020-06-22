@@ -12,13 +12,11 @@
             <table class="table">
                 <tr>
                     <th>Thread</th>
-                    <th>Number of messages</th>
                 </tr>
 
                 {{range .}}
                     <tr>
-                        <td><a href="/{{(makeMessage .Headers).GetListNameFromSubject}}/message/{{.Id}}/">{{(makeMessage .Headers).GetSubject}}</a></td>
-                        <td>{{.Count}}</td>
+                        <td><a href="/{{.GetListNameFromSubject}}/message/{{.Id}}/">{{.Subject}}</a></td>
                     </tr>
                 {{end}}
 

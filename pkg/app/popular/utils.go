@@ -16,7 +16,7 @@ func renderPopularThreads(w http.ResponseWriter, templateData interface{}) {
 				Funcs(template.FuncMap{
 					"makeMessage": func(headers map[string][]string) models.Message {
 						return models.Message{
-							Headers: headers,
+							//Headers: headers,
 						}
 					},
 				}).
@@ -28,17 +28,16 @@ func renderPopularThreads(w http.ResponseWriter, templateData interface{}) {
 
 // utility methods
 
-func GetPopularThreads(n int, date string) (models.Threads, error) {
-	var popularThreads models.Threads
-	err := database.DBCon.Model(&popularThreads).
-		TableExpr(`(SELECT id, headers, regexp_replace(regexp_replace(regexp_replace(regexp_replace(headers::jsonb->>'Subject','^\["',''),'"\]$',''),'^Re:\s',''), '^\[.*\]', '') AS c FROM messages WHERE date >= '2020-06-12'::date) t`).
-		ColumnExpr(`c as Subject, jsonb_agg(id)->>0 as Id, jsonb_agg(headers)->>0 as Headers, Count(*) as Count`).
-		GroupExpr(`c`).
-		OrderExpr(`count DESC`).
+func GetPopularThreads(n int, date string) ([]*models.Message, error) {
+
+	var recentMessages []*models.Message
+
+	err := database.DBCon.Model(&recentMessages).
+		OrderExpr("date DESC").
 		Limit(n).
 		Select()
 
-	return popularThreads, err
+	return recentMessages, err
 }
 
 func GetMessagesFromPopularThreads(threads models.Threads) []*models.Message {

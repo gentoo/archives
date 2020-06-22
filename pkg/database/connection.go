@@ -21,9 +21,16 @@ var (
 func CreateSchema() error {
 	if !tableExists("messages") {
 
-		err := DBCon.CreateTable((*models.Message)(nil), &orm.CreateTableOptions{
-			IfNotExists: true,
-		})
+		for _, model := range []interface{}{(*models.Message)(nil),
+			(*models.MessageToReferences)(nil)} {
+
+			err := DBCon.CreateTable(model, &orm.CreateTableOptions{
+				IfNotExists: true,
+			})
+			if err != nil {
+				return err
+			}
+		}
 
 		// Add tsvector column for subjects
 		DBCon.Exec("ALTER TABLE messages ADD COLUMN tsv_subject tsvector;")
@@ -33,7 +40,7 @@ func CreateSchema() error {
 		DBCon.Exec("ALTER TABLE messages ADD COLUMN tsv_body tsvector;")
 		DBCon.Exec("CREATE INDEX body_idx ON messages USING gin(tsv_body);")
 
-		return err
+		return nil
 	}
 	return nil
 }

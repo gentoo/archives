@@ -15,73 +15,216 @@ import (
 	"time"
 )
 
-func importMail(name, path, maildirPath string) {
-	file, _ := os.Open(path)
-	m, _ := mail.ReadMessage(file)
+type MailIdentifier struct {
+	ArchivesHash string
+	MessageId string
+	To string
+}
 
-	msg := models.Message{
-		Id:          m.Header.Get("X-Archives-Hash"),
-		Filename:    name,
-		Headers:     m.Header,
-		Attachments: nil,
-		Body:        getBody(m.Header, m.Body),
-		Date:        getDate(m.Header),
-		Lists:       getLists(m.Header),
-		List:        getListName(path),
-		Comment:     "",
-		Hidden:      false,
-	}
+// TODO
+var mails []*models.Message
 
-	err := insertMessage(msg)
-
+// TODO
+func initImport(path string, info os.FileInfo, err error) error {
 	if err != nil {
-		fmt.Println("Error during importing Mail")
-		fmt.Println(err)
+		return err
 	}
+	if !info.IsDir() && getDepth(path, config.MailDirPath()) >= 1 && isPublicList(path) {
+
+		file, _ := os.Open(path)
+		m, _ := mail.ReadMessage(file)
+
+		mails = append(mails, &models.Message{
+			Id:           m.Header.Get("X-Archives-Hash"),
+			Filename:     info.Name(),
+			From:         m.Header.Get("From"),
+			To:           strings.Split(m.Header.Get("To"), ","),
+			Subject:      m.Header.Get("Subject"),
+			MessageId:    m.Header.Get("Message-Id"),
+		})
+	}
+	return nil
+}
+
+// TODO
+func importMail(path string, info os.FileInfo, err error) error {
+	if err != nil {
+		return err
+	}
+	if !info.IsDir() && getDepth(path, config.MailDirPath()) >= 1 && isPublicList(path) {
+		file, _ := os.Open(path)
+		m, _ := mail.ReadMessage(file)
+
+		msg := models.Message{
+			Id:          m.Header.Get("X-Archives-Hash"),
+			MessageId:   m.Header.Get("Message-Id"),
+			Filename:    info.Name(),
+			From:        m.Header.Get("From"),
+			To:          strings.Split(m.Header.Get("To"), ","),
+			Cc:          strings.Split(m.Header.Get("Cc"), ","),
+			Subject:     m.Header.Get("Subject"),
+
+			List:        getListName(path),
+
+			// TODO
+			Date:        getDate(m.Header),
+			InReplyToId:   getInReplyToMail(m.Header.Get("In-Reply-To"), m.Header.Get("From")),
+			//References:  getReferencesToMail(strings.Split(m.Header.Get("References"), ","), m.Header.Get("From")),
+			Body:        getBody(m.Header, m.Body),
+			Attachments: getAttachments(m.Header, m.Body),
+
+			StartsThread: m.Header.Get("In-Reply-To") == "" && m.Header.Get("References") == "",
+
+			Comment:     "",
+			Hidden:      false,
+		}
+
+		err := insertMessage(msg)
+
+		if err != nil {
+			fmt.Println("Error during importing Mail")
+			fmt.Println(err)
+		}
+
+		insertReferencesToMail(strings.Split(m.Header.Get("References"), ","), m.Header.Get("X-Archives-Hash"), m.Header.Get("From"))
+
+	}
+	return nil
+}
+
+func getInReplyToMail(messageId, from string) string {
+	// step 1 TODO add description
+	for _, mail := range mails {
+		if mail.MessageId == messageId && strings.Contains(strings.Join(mail.To, ", "), from) {
+			return mail.Id
+		}
+	}
+	// step 2 TODO add description
+	for _, mail := range mails {
+		if mail.MessageId == messageId {
+			return mail.Id
+		}
+	}
+	return ""
+}
+
+
+func insertReferencesToMail(references []string, messageId, from string) []*models.Message {
+	var referencesToMail []*models.Message
+	for _, reference := range references {
+		// step 1 TODO add description
+		for _, mail := range mails {
+			if mail.MessageId == reference  && strings.Contains(strings.Join(mail.To, ", "), from) {
+				referencesToMail = append(referencesToMail, mail)
+			}
+		}
+		// step 2 TODO add description
+		for _, mail := range mails {
+			if mail.MessageId == reference {
+				referencesToMail = append(referencesToMail, mail)
+			}
+		}
+	}
+
+	for _, reference := range referencesToMail {
+		_, err := database.DBCon.Model(&models.MessageToReferences{
+			MessageId: messageId,
+			ReferenceId: reference.Id,
+		}).Insert()
+
+		if err != nil {
+			fmt.Println("Err inserting Message to references")
+			fmt.Println(err)
+		}
+	}
+
+	return referencesToMail
 }
 
 func getDepth(path, maildirPath string) int {
 	return strings.Count(strings.ReplaceAll(path, maildirPath, ""), "/")
 }
 
-func getBody(header mail.Header, body io.Reader) map[string]string {
+func getBody(header mail.Header, body io.Reader) string {
 	if isMultipartMail(header) {
 		boundary := regexp.MustCompile(`boundary="(.*?)"`).
 			FindStringSubmatch(
 				header.Get("Content-Type"))
 		if len(boundary) != 2 {
 			//err
-			return map[string]string{
-				"text/plain": "",
+			return ""
+		}
+		parsedBody := ""
+		mr := multipart.NewReader(body, boundary[1])
+		for {
+			p, err := mr.NextPart()
+			if err != nil {
+				return parsedBody
+			}
+			bodyContent, err := ioutil.ReadAll(p)
+			if err != nil {
+				fmt.Println("Error while reading the body:")
+				fmt.Println(err)
+				continue
+			}
+			if strings.Contains(p.Header.Get("Content-Type"), "text/plain") {
+				return string(bodyContent)
+			} else if strings.Contains(p.Header.Get("Content-Type"), "text/html") {
+				parsedBody = string(bodyContent)
 			}
 		}
-		return getBodyParts(body, boundary[1])
+		return parsedBody
 	} else {
 		content, _ := ioutil.ReadAll(body)
-		return map[string]string{
-			getContentType(header): string(content),
-		}
+		return string(content)
 	}
 }
 
-func getBodyParts(body io.Reader, boundary string) map[string]string {
-	bodyParts := make(map[string]string)
-	mr := multipart.NewReader(body, boundary)
+
+func getAttachments(header mail.Header, body io.Reader) []models.Attachment {
+
+	if !isMultipartMail(header) {
+		return nil
+	}
+
+	boundary := regexp.MustCompile(`boundary="(.*?)"`).
+		FindStringSubmatch(
+			header.Get("Content-Type"))
+	if len(boundary) != 2 {
+		return nil
+	}
+	var attachments []models.Attachment
+	mr := multipart.NewReader(body, boundary[1])
 	for {
 		p, err := mr.NextPart()
 		if err != nil {
-			return bodyParts
+			return attachments
 		}
-		slurp, err := ioutil.ReadAll(p)
+		content, err := ioutil.ReadAll(p)
 		if err != nil {
 			fmt.Println("Error while reading the body:")
 			fmt.Println(err)
 			continue
 		}
-		bodyParts[p.Header.Get("Content-Type")] = string(slurp)
+
+		attachments = append(attachments, models.Attachment{
+			Filename: getAttachmentFileName(p.Header.Get("Content-Type")),
+			Mime:     p.Header.Get("Content-Type"),
+			Content:  string(content),
+		})
+
 	}
-	return bodyParts
+	return attachments
 }
+
+func getAttachmentFileName(contentTypeHeader string) string {
+	parts := strings.Split(contentTypeHeader, "name=")
+	if len(parts) < 2 {
+		return "unknown"
+	}
+	return strings.ReplaceAll(parts[1], "\"", "")
+}
+
 
 func getContentType(header mail.Header) string {
 	contentTypes := regexp.MustCompile(`(.*?);`).
@@ -103,20 +246,6 @@ func isMultipartMail(header mail.Header) bool {
 	return strings.Contains(getContentType(header), "multipart")
 }
 
-func getLists(header mail.Header) []string {
-	var lists []string
-	// To
-	adr, _ := mail.ParseAddressList(header.Get("To"))
-	for _, v := range adr {
-		lists = append(lists, v.Address)
-	}
-	// Cc
-	adr, _ = mail.ParseAddressList(header.Get("Cc"))
-	for _, v := range adr {
-		lists = append(lists, v.Address)
-	}
-	return lists
-}
 
 func getListName(path string) string {
 	listName := strings.ReplaceAll(path, config.MailDirPath() + ".", "")
@@ -126,8 +255,8 @@ func getListName(path string) string {
 
 func insertMessage(message models.Message) error {
 	_, err := database.DBCon.Model(&message).
-		Value("tsv_subject", "to_tsvector(?)", message.GetSubject()).
-		Value("tsv_body", "to_tsvector(?)", message.GetBody()).
+		Value("tsv_subject", "to_tsvector(?)", message.Subject).
+		Value("tsv_body", "to_tsvector(?)", message.Body).
 		OnConflict("(id) DO NOTHING").
 		Insert()
 	return err
