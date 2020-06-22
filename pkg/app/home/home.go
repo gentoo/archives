@@ -4,6 +4,7 @@ package home
 
 import (
 	"archives/pkg/app/popular"
+	"archives/pkg/cache"
 	"archives/pkg/config"
 	"archives/pkg/database"
 	"archives/pkg/models"
@@ -14,7 +15,15 @@ import (
 
 // Show renders a template to show the landing page of the application
 func Show(w http.ResponseWriter, r *http.Request) {
+	templateData := cache.Get("/")
+	if templateData == nil {
+		http.NotFound(w,r)
+		return
+	}
+	renderIndexTemplate(w, templateData)
+}
 
+func ComputeTemplateData() interface{} {
 	var mailingLists []models.MailingList
 
 	for _, mailingList := range config.IndexMailingLists() {
@@ -48,14 +57,13 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	//
 	popularThreads, err := popular.GetPopularThreads(10, "2020-06-01")
 	if err != nil {
-		http.NotFound(w, r)
-		return
+		return nil
 	}
 	if len(popularThreads) > 5 {
 		popularThreads = popularThreads[:5]
 	}
 
-	templateData := struct {
+	return struct {
 		MailingLists   []models.MailingList
 		PopularThreads []*models.Message
 		MessageCount   string
@@ -66,6 +74,4 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		MessageCount:   formatMessageCount(getAllMessagesCount()),
 		CurrentMonth:   time.Now().Format("2006-01"),
 	}
-
-	renderIndexTemplate(w, templateData)
 }

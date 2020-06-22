@@ -1,6 +1,7 @@
 package list
 
 import (
+	"archives/pkg/cache"
 	"archives/pkg/config"
 	"archives/pkg/database"
 	"archives/pkg/models"
@@ -8,7 +9,15 @@ import (
 )
 
 func Browse(w http.ResponseWriter, r *http.Request) {
+	templateData := cache.Get("/lists")
+	if templateData == nil {
+		http.NotFound(w,r)
+		return
+	}
+	renderBrowseTemplate(w, templateData)
+}
 
+func ComputeBrowseTemplateData() interface{} {
 	var res []struct {
 		Name string
 		MessageCount int
@@ -19,8 +28,7 @@ func Browse(w http.ResponseWriter, r *http.Request) {
 		Select(&res)
 
 	if err != nil {
-		http.NotFound(w,r)
-		return
+		return nil
 	}
 
 	var currentMailingLists []models.MailingList
@@ -40,17 +48,14 @@ func Browse(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	browseData := struct {
+	return struct {
 		CurrentMailingLists []models.MailingList
 		FrozenArchives      []models.MailingList
 	}{
 		CurrentMailingLists: currentMailingLists,
 		FrozenArchives:      frozenArchives,
 	}
-
-	renderBrowseTemplate(w, browseData)
 }
-
 
 func contains(s []string, e string) bool {
 	for _, a := range s {

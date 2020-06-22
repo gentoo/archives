@@ -3,6 +3,7 @@
 package app
 
 import (
+	"archives/pkg/app/cache"
 	"archives/pkg/app/home"
 	"archives/pkg/app/list"
 	"archives/pkg/app/message"
@@ -16,6 +17,10 @@ import (
 
 // Serve is used to serve the web application
 func Serve() {
+
+	// init caches
+	cache.Init()
+	cache.Update()
 
 	fmt.Println("Serving on Port " + config.Port())
 
@@ -36,6 +41,8 @@ func Serve() {
 
 	fs := http.StripPrefix("/assets/", http.FileServer(http.Dir("assets")))
 	http.Handle("/assets/", fs)
+
+	setRoute("/cache/update", cache.UpdateHandler)
 
 	log.Fatal(http.ListenAndServe(":"+config.Port(), nil))
 

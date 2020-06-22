@@ -1,6 +1,7 @@
 package list
 
 import (
+	"archives/pkg/cache"
 	"archives/pkg/database"
 	"archives/pkg/models"
 	"github.com/go-pg/pg/v10/orm"
@@ -9,9 +10,17 @@ import (
 )
 
 func Show(w http.ResponseWriter, r *http.Request) {
-
 	listName := strings.ReplaceAll(r.URL.Path, "/", "")
+	templateData := cache.Get("/" + listName + "/")
+	if templateData == nil {
+		http.NotFound(w,r)
+		return
+	}
+	renderShowTemplate(w, listName, templateData)
+}
 
+
+func ComputeShowTemplateData(listName string) interface{} {
 	var res []struct {
 		CombinedDate string
 		MessageCount int
@@ -36,9 +45,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		Select(&res)
 
 	if err != nil {
-		http.NotFound(w, r)
-		return
+		return nil
 	}
-
-	renderShowTemplate(w, listName, res)
+	return res
 }
