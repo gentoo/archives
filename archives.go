@@ -39,6 +39,7 @@ func main() {
 		app.Serve()
 	}
 
+	importer.WaitGroup.Wait()
 }
 
 // TODO this has to be solved differently

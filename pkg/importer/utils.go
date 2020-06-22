@@ -14,6 +14,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -25,6 +26,9 @@ type MailIdentifier struct {
 
 // TODO
 var mails []*models.Message
+
+// TODO
+var WaitGroup sync.WaitGroup
 
 // TODO
 func initImport(path string, info os.FileInfo, err error) error {
@@ -69,19 +73,21 @@ func importMail(path, filename string) error {
 		return err
 	}
 
+	WaitGroup.Add(1)
 	go importIntoDatabase(path, filename, m)
 
 	return nil
 }
 
 func importIntoDatabase(path, filename string, m *mail.Message) {
+	bodyContent, attachments := parseBody(m)
 	msg := models.Message{
 		Id:          m.Header.Get("X-Archives-Hash"),
 		MessageId:   m.Header.Get("Message-Id"),
 		Filename:    filename,
 		From:        m.Header.Get("From"),
-		To:          strings.Split(m.Header.Get("To"), ","),
-		Cc:          strings.Split(m.Header.Get("Cc"), ","),
+		To:          parseAddressList(m.Header.Get("To")),
+		Cc:          parseAddressList(m.Header.Get("Cc")),
 		Subject:     m.Header.Get("Subject"),
 
 		List:        getListName(path),
@@ -90,8 +96,8 @@ func importIntoDatabase(path, filename string, m *mail.Message) {
 		Date:        getDate(m.Header),
 		InReplyToId:   getInReplyToMail(m.Header.Get("In-Reply-To"), m.Header.Get("From")),
 		//References:  getReferencesToMail(strings.Split(m.Header.Get("References"), ","), m.Header.Get("From")),
-		Body:        getBody(m.Header, m.Body),
-		Attachments: getAttachments(m.Header, m.Body),
+		Body:        bodyContent,
+		Attachments: attachments,
 
 		StartsThread: m.Header.Get("In-Reply-To") == "" && m.Header.Get("References") == "",
 
@@ -107,6 +113,15 @@ func importIntoDatabase(path, filename string, m *mail.Message) {
 
 	insertReferencesToMail(strings.Split(m.Header.Get("References"), ","), m.Header.Get("X-Archives-Hash"), m.Header.Get("From"))
 
+	WaitGroup.Done()
+}
+
+func parseAddressList(addressList string) []string {
+	result := strings.Split(addressList, ",")
+	if len(result) == 1 && strings.TrimSpace(result[0]) == "" {
+		return nil
+	}
+	return result
 }
 
 func getInReplyToMail(messageId, from string) string {
@@ -162,21 +177,25 @@ func getDepth(path, maildirPath string) int {
 	return strings.Count(strings.ReplaceAll(path, maildirPath, ""), "/")
 }
 
-func getBody(header mail.Header, body io.Reader) string {
+func parseBody(m *mail.Message) (string, []models.Attachment) {
+	header := m.Header
+	body := m.Body
+	foundPlainText := false
 	if isMultipartMail(header) {
+		var attachments []models.Attachment
 		boundary := regexp.MustCompile(`boundary="(.*?)"`).
 			FindStringSubmatch(
 				header.Get("Content-Type"))
 		if len(boundary) != 2 {
 			//err
-			return ""
+			return "", attachments
 		}
 		parsedBody := ""
 		mr := multipart.NewReader(body, boundary[1])
 		for {
 			p, err := mr.NextPart()
 			if err != nil {
-				return parsedBody
+				return parsedBody, attachments
 			}
 			bodyContent, err := ioutil.ReadAll(p)
 			if err != nil {
@@ -185,15 +204,61 @@ func getBody(header mail.Header, body io.Reader) string {
 				continue
 			}
 			if strings.Contains(p.Header.Get("Content-Type"), "text/plain") {
-				return string(bodyContent)
-			} else if strings.Contains(p.Header.Get("Content-Type"), "text/html") {
 				parsedBody = string(bodyContent)
+				foundPlainText = true
+			} else if strings.Contains(p.Header.Get("Content-Type"), "text/html") {
+				if !foundPlainText {
+					parsedBody = string(bodyContent)
+				}
+			} else if strings.Contains(p.Header.Get("Content-Type"), "multipart") {
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+				boundary := regexp.MustCompile(`boundary="(.*?)"`).
+					FindStringSubmatch(p.Header.Get("Content-Type"))
+				if len(boundary) != 2 {
+					//err
+					continue
+				}
+				mr := multipart.NewReader(bytes.NewReader(bodyContent), boundary[1])
+				for {
+					p, err := mr.NextPart()
+					if err != nil {
+						break
+					}
+					bodyContent, err := ioutil.ReadAll(p)
+					if err != nil {
+						fmt.Println("Error while reading the body:")
+						fmt.Println(err)
+						continue
+					}
+					if strings.Contains(p.Header.Get("Content-Type"), "text/plain") {
+						parsedBody = string(bodyContent)
+					} else if strings.Contains(p.Header.Get("Content-Type"), "text/html") {
+						if !foundPlainText {
+							parsedBody = string(bodyContent)
+						}
+					} else {
+						attachments = append(attachments, models.Attachment{
+							Filename: getAttachmentFileName(p.Header.Get("Content-Type")),
+							Mime:     p.Header.Get("Content-Type"),
+							Content:  string(bodyContent),
+						})
+					}
+				}
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+			} else {
+				attachments = append(attachments, models.Attachment{
+					Filename: getAttachmentFileName(p.Header.Get("Content-Type")),
+					Mime:     p.Header.Get("Content-Type"),
+					Content:  string(bodyContent),
+				})
 			}
 		}
-		return parsedBody
+		return parsedBody, attachments
 	} else {
 		content, _ := ioutil.ReadAll(body)
-		return string(content)
+		return string(content), nil
 	}
 }
 
