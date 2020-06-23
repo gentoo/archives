@@ -4,7 +4,6 @@ import (
 	"archives/pkg/cache"
 	"archives/pkg/database"
 	"archives/pkg/models"
-	"github.com/go-pg/pg/v10/orm"
 	"net/http"
 	"strings"
 )
@@ -26,11 +25,7 @@ func ComputeShowTemplateData(listName string) interface{} {
 		MessageCount int
 	}
 	err := database.DBCon.Model((*models.Message)(nil)).
-		WhereGroup(func(q *orm.Query) (*orm.Query, error) {
-			q = q.WhereOr(`subject LIKE '[` + listName + `]%'`).
-				WhereOr(`subject LIKE 'Re: [` + listName + `]%'`)
-			return q, nil
-		}).
+		Where("list = ?", listName).
 		ColumnExpr("to_char(date, 'YYYY-MM') AS combined_date").
 		ColumnExpr("count(*) AS message_count").
 		Group("combined_date").
