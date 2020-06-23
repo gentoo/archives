@@ -80,6 +80,6 @@ func Connect() {
 // utility methods
 
 func tableExists(tableName string) bool {
-	_, err := DBCon.Exec("select * from " + tableName + ";")
+	_, err := DBCon.Exec("select * from " + tableName + " limit 1;")
 	return err == nil
 }
