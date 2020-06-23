@@ -16,7 +16,7 @@ func renderMessageTemplate(w http.ResponseWriter, listName string, message *mode
 			template.New("Show").
 				Funcs(getFuncMap()).
 				ParseGlob("web/templates/layout/*.tmpl")).
-			ParseGlob("web/templates/message/*.tmpl"))
+			ParseGlob("web/templates/message/show.tmpl"))
 
 	templateData := struct {
 		ListName  string

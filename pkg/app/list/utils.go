@@ -24,7 +24,7 @@ func renderShowTemplate(w http.ResponseWriter, listName string, messageData inte
 		template.Must(
 			template.New("Show").
 				ParseGlob("web/templates/layout/*.tmpl")).
-			ParseGlob("web/templates/list/*.tmpl"))
+			ParseGlob("web/templates/list/show.tmpl"))
 
 	templteData := struct {
 		ListName    string
@@ -46,7 +46,7 @@ func renderMessagesTemplate(w http.ResponseWriter, listName string, date string,
 					Funcs(getFuncMap()).
 					ParseGlob("web/templates/layout/*.tmpl")).
 				ParseGlob("web/templates/list/components/*.tmpl")).
-			ParseGlob("web/templates/list/*.tmpl"))
+			ParseGlob("web/templates/list/messages.tmpl"))
 
 	templates.ExecuteTemplate(w, "messages.tmpl", buildListData(listName, date, currentPage, maxPages, messages))
 }
@@ -60,7 +60,7 @@ func renderThreadsTemplate(w http.ResponseWriter, listName string, date string, 
 					Funcs(getFuncMap()).
 					ParseGlob("web/templates/layout/*.tmpl")).
 				ParseGlob("web/templates/list/components/*.tmpl")).
-			ParseGlob("web/templates/list/*.tmpl"))
+			ParseGlob("web/templates/list/threads.tmpl"))
 
 	templates.ExecuteTemplate(w, "threads.tmpl", buildListData(listName, date, currentPage, maxPages, messages))
 }
@@ -75,7 +75,7 @@ func renderBrowseTemplate(w http.ResponseWriter, lists interface{}) {
 					"formatCount" : utils.FormatMessageCount,
 			}).
 				ParseGlob("web/templates/layout/*.tmpl")).
-			ParseGlob("web/templates/list/*.tmpl"))
+			ParseGlob("web/templates/list/browse.tmpl"))
 
 	templates.ExecuteTemplate(w, "browse.tmpl", lists)
 }

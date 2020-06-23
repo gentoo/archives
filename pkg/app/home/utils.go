@@ -16,7 +16,7 @@ func renderIndexTemplate(w http.ResponseWriter, templateData interface{}) {
 		template.Must(
 			template.New("Show").
 				ParseGlob("web/templates/layout/*.tmpl")).
-			ParseGlob("web/templates/home/*.tmpl"))
+			ParseGlob("web/templates/home/home.tmpl"))
 
 	templates.ExecuteTemplate(w, "home.tmpl", templateData)
 }

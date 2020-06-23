@@ -24,7 +24,7 @@ func renderSearchTemplate(w http.ResponseWriter, showThreads bool, searchQuery s
 					Funcs(getFuncMap()).
 					ParseGlob("web/templates/layout/*.tmpl")).
 				ParseGlob("web/templates/search/components/pagination.tmpl")).
-			ParseGlob("web/templates/search/*.tmpl"))
+			ParseGlob("web/templates/search/searchresults.tmpl"))
 
 	templates.ExecuteTemplate(w, "searchresults.tmpl", buildSearchData(showThreads, searchQuery, messagesCount, currentPage, maxPages, messages))
 }

@@ -13,7 +13,7 @@ func renderPopularThreads(w http.ResponseWriter, templateData interface{}) {
 		template.Must(
 			template.New("Popular").
 				ParseGlob("web/templates/layout/*.tmpl")).
-			ParseGlob("web/templates/popular/*.tmpl"))
+			ParseGlob("web/templates/popular/threads.tmpl"))
 
 	templates.ExecuteTemplate(w, "threads.tmpl", templateData)
 }
