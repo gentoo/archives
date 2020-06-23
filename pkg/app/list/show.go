@@ -31,13 +31,6 @@ func ComputeShowTemplateData(listName string) interface{} {
 				WhereOr(`subject LIKE 'Re: [` + listName + `]%'`)
 			return q, nil
 		}).
-		//WhereGroup(func(q *orm.Query) (*orm.Query, error) {
-		//	q = q.WhereOr(`to LIKE '%` + listName + `@lists.gentoo.org%'`).
-		//		WhereOr(`cc LIKE '%` + listName + `@lists.gentoo.org%'`).
-		//		WhereOr(`to LIKE '%` + listName + `@gentoo.org%'`).
-		//		WhereOr(`cc LIKE '%` + listName + `@gentoo.org%'`)
-		//	return q, nil
-		//}).
 		ColumnExpr("to_char(date, 'YYYY-MM') AS combined_date").
 		ColumnExpr("count(*) AS message_count").
 		Group("combined_date").

@@ -40,13 +40,6 @@ func Threads(w http.ResponseWriter, r *http.Request) {
 				WhereOr(`subject LIKE 'Re: [` + listName + `]%'`)
 			return q, nil
 		}).
-		//WhereGroup(func(q *orm.Query) (*orm.Query, error) {
-		//	q = q.WhereOr(`headers::jsonb->>'To' LIKE '%` + listName + `@lists.gentoo.org%'`).
-		//		WhereOr(`headers::jsonb->>'Cc' LIKE '%` + listName + `@lists.gentoo.org%'`).
-		//		WhereOr(`headers::jsonb->>'To' LIKE '%` + listName + `@gentoo.org%'`).
-		//		WhereOr(`headers::jsonb->>'Cc' LIKE '%` + listName + `@gentoo.org%'`)
-		//	return q, nil
-		//}).
 		Order("date DESC")
 
 	messagesCount, _ := query.Count()

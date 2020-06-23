@@ -3,9 +3,7 @@
 package list
 
 import (
-	"archives/pkg/database"
 	"archives/pkg/models"
-	"github.com/go-pg/pg/v10/orm"
 	"html/template"
 	"net/http"
 )
@@ -118,20 +116,4 @@ func makeRange(min, max int) []int {
 		a[i] = min + i
 	}
 	return a
-}
-
-func countMessages(listName string) (int, error) {
-	return database.DBCon.Model((*models.Message)(nil)).
-		WhereGroup(func(q *orm.Query) (*orm.Query, error) {
-			q = q.WhereOr(`(headers::jsonb->>'Subject')::jsonb->>0 LIKE '[` + listName + `]%'`).
-				WhereOr(`(headers::jsonb->>'Subject')::jsonb->>0 LIKE 'Re: [` + listName + `]%'`)
-			return q, nil
-		}).
-		WhereGroup(func(q *orm.Query) (*orm.Query, error) {
-			q = q.WhereOr(`headers::jsonb->>'To' LIKE '%` + listName + `@lists.gentoo.org%'`).
-				WhereOr(`headers::jsonb->>'Cc' LIKE '%` + listName + `@lists.gentoo.org%'`).
-				WhereOr(`headers::jsonb->>'To' LIKE '%` + listName + `@gentoo.org%'`).
-				WhereOr(`headers::jsonb->>'Cc' LIKE '%` + listName + `@gentoo.org%'`)
-			return q, nil
-		}).Count()
 }

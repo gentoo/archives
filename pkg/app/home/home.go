@@ -34,13 +34,6 @@ func ComputeTemplateData() interface{} {
 					WhereOr(`subject LIKE 'Re: [` + mailingList[0] + `]%'`)
 				return q, nil
 			}).
-			//WhereGroup(func(q *orm.Query) (*orm.Query, error) {
-			//	q = q.WhereOr(`headers::jsonb->>'To' LIKE '%` + mailingList[0] + `@lists.gentoo.org%'`).
-			//		WhereOr(`headers::jsonb->>'Cc' LIKE '%` + mailingList[0] + `@lists.gentoo.org%'`).
-			//		WhereOr(`headers::jsonb->>'To' LIKE '%` + mailingList[0] + `@gentoo.org%'`).
-			//		WhereOr(`headers::jsonb->>'Cc' LIKE '%` + mailingList[0] + `@gentoo.org%'`)
-			//	return q, nil
-			//}).
 			Order("date DESC").
 			Limit(5).
 			Select()

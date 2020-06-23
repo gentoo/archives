@@ -16,13 +16,6 @@ func renderIndexTemplate(w http.ResponseWriter, templateData interface{}) {
 	templates := template.Must(
 		template.Must(
 			template.New("Show").
-				Funcs(template.FuncMap{
-					"makeMessage": func(headers map[string][]string) models.Message {
-						return models.Message{
-							//Headers: headers,
-						}
-					},
-				}).
 				ParseGlob("web/templates/layout/*.tmpl")).
 			ParseGlob("web/templates/home/*.tmpl"))
 
