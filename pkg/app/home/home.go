@@ -29,6 +29,7 @@ func ComputeTemplateData() interface{} {
 		var messages []*models.Message
 		database.DBCon.Model(&messages).
 			Where("list = ?", mailingList[0]).
+			Where("not date is null").
 			Order("date DESC").
 			Limit(5).
 			Select()

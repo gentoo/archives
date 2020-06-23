@@ -25,6 +25,7 @@ func GetPopularThreads(n int, date string) ([]*models.Message, error) {
 	var recentMessages []*models.Message
 
 	err := database.DBCon.Model(&recentMessages).
+		Where("not date is null").
 		OrderExpr("date DESC").
 		Limit(n).
 		Select()
