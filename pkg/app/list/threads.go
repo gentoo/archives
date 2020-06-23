@@ -3,7 +3,6 @@ package list
 import (
 	"archives/pkg/database"
 	"archives/pkg/models"
-	"github.com/go-pg/pg/v10/orm"
 	"math"
 	"net/http"
 	"strconv"
@@ -35,11 +34,7 @@ func Threads(w http.ResponseWriter, r *http.Request) {
 		Column("id", "subject", "from", "date").
 		Where("to_char(date, 'YYYY-MM') = ?", combinedDate).
 		Where(`starts_thread = TRUE`).
-		WhereGroup(func(q *orm.Query) (*orm.Query, error) {
-			q = q.WhereOr(`subject LIKE '[` + listName + `]%'`).
-				WhereOr(`subject LIKE 'Re: [` + listName + `]%'`)
-			return q, nil
-		}).
+		Where("list = ?", listName).
 		Order("date DESC")
 
 	messagesCount, _ := query.Count()
