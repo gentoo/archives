@@ -1,6 +1,7 @@
 package models
 
 import (
+	"mime"
 	"net/mail"
 	"strings"
 	"time"
@@ -78,6 +79,14 @@ func (m Message) GetAuthorName() string {
 		return addr.Address
 	}
 	return addr.Name
+}
+
+func (m Message) GetSubject() string {
+	header, err := new(mime.WordDecoder).DecodeHeader(m.Subject)
+	if err == nil {
+		return header
+	}
+	return m.Subject
 }
 
 func (m Message) GetMessageId() string {

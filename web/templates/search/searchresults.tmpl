@@ -28,7 +28,7 @@
 
                 {{range .Messages}}
                 <tr>
-                  <td><a href="/{{.GetListNameFromSubject}}/message/{{.Id}}">{{.Subject}}</a></td>
+                  <td><a href="/{{.GetListNameFromSubject}}/message/{{.Id}}">{{.GetSubject}}</a></td>
                   <td>{{.GetAuthorName}}</td>
                   <td><span class="ag-date">{{.Date.Format "Mon, 2 Jan 2006 15:04:05"}}</span></td>
                 </tr>
