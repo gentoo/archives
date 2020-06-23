@@ -16,10 +16,12 @@
               </tr>
 
               {{range .MessageData}}
-                <tr>
-                  <td><a href="threads/{{.CombinedDate}}/">{{.CombinedDate}}</a></td>
-                  <td>{{.MessageCount}}</td>
-                </tr>
+                {{if ne .CombinedDate ""}}
+                    <tr>
+                      <td><a href="threads/{{.CombinedDate}}/">{{.CombinedDate}}</a></td>
+                      <td>{{.MessageCount}}</td>
+                    </tr>
+                {{end}}
               {{end}}
 
             </table>
