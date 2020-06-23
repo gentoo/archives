@@ -8,7 +8,6 @@ import (
 	"github.com/go-pg/pg/v10"
 	"html/template"
 	"net/http"
-	"strconv"
 )
 
 // renderIndexTemplate renders all templates used for the landing page
@@ -33,25 +32,4 @@ func getAllMessagesCount() int {
 			messages;
 	`)
 	return messsageCount
-}
-
-// formatMessageCount returns the formatted number of
-// messages containing a thousands comma
-func formatMessageCount(messageCount int) string {
-	packages := strconv.Itoa(messageCount)
-	if len(string(messageCount)) == 9 {
-		return packages[:3] + "," + packages[3:6] + "," + packages[6:]
-	} else if len(packages) == 8 {
-		return packages[:2] + "," + packages[2:5] + "," + packages[5:]
-	} else if len(packages) == 7 {
-		return packages[:1] + "," + packages[1:4] + "," + packages[4:]
-	} else if len(packages) == 6 {
-		return packages[:3] + "," + packages[3:]
-	} else if len(packages) == 5 {
-		return packages[:2] + "," + packages[2:]
-	} else if len(packages) == 4 {
-		return packages[:1] + "," + packages[1:]
-	} else {
-		return packages
-	}
 }

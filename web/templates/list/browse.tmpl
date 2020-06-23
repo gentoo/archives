@@ -21,7 +21,7 @@
                             {{.Name}}
                           </span>
                           <h4 class="mb-0">
-                          <span class="badge badge-secondary badge-pill">{{.MessageCount}}</span>
+                          <span class="badge badge-secondary badge-pill">{{formatCount (toString .MessageCount)}}</span>
                           </h4>
                         </a>
                     {{end}}
@@ -48,7 +48,7 @@
                               {{.Name}}
                           </span>
                           <h4 class="mb-0">
-                          <span class="badge badge-secondary badge-pill">{{.MessageCount}}</span>
+                          <span class="badge badge-secondary badge-pill">{{formatCount (toString .MessageCount)}}</span>
                           </h4>
                         </a>
                     {{end}}

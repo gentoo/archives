@@ -8,7 +8,9 @@ import (
 	"archives/pkg/config"
 	"archives/pkg/database"
 	"archives/pkg/models"
+	"archives/pkg/utils"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -60,7 +62,7 @@ func ComputeTemplateData() interface{} {
 	}{
 		MailingLists:   mailingLists,
 		PopularThreads: popularThreads,
-		MessageCount:   formatMessageCount(getAllMessagesCount()),
+		MessageCount:   utils.FormatMessageCount(strconv.Itoa(getAllMessagesCount())),
 		CurrentMonth:   time.Now().Format("2006-01"),
 	}
 }

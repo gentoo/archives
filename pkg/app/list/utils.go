@@ -4,8 +4,10 @@ package list
 
 import (
 	"archives/pkg/models"
+	"archives/pkg/utils"
 	"html/template"
 	"net/http"
+	"strconv"
 )
 
 type ListData struct {
@@ -68,6 +70,10 @@ func renderBrowseTemplate(w http.ResponseWriter, lists interface{}) {
 	templates := template.Must(
 		template.Must(
 			template.New("Show").
+				Funcs(template.FuncMap{
+					"toString" : strconv.Itoa,
+					"formatCount" : utils.FormatMessageCount,
+			}).
 				ParseGlob("web/templates/layout/*.tmpl")).
 			ParseGlob("web/templates/list/*.tmpl"))
 
