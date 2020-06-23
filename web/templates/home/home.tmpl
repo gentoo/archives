@@ -45,7 +45,7 @@
                 <div class="mx-auto text-center">
                     <p class="mb-1"><a class="text-muted" href="/popular"><b>Recent Popular Threads</b></a></p>
                     {{range .PopularThreads}}
-                    <p class="mb-1"><a href="/{{.GetListNameFromSubject}}/message/{{.Id}}" class="text-muted">{{.Subject}}</a></p>
+                    <p class="mb-1"><a href="/{{.List}}/message/{{.Id}}" class="text-muted">{{.Subject}}</a></p>
                     {{end}}
                 </div>
             </div>
