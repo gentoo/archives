@@ -3,7 +3,6 @@ package list
 import (
 	"archives/pkg/database"
 	"archives/pkg/models"
-	"github.com/go-pg/pg/v10/orm"
 	"math"
 	"net/http"
 	"strconv"
@@ -35,18 +34,7 @@ func Messages(w http.ResponseWriter, r *http.Request) {
 	query := database.DBCon.Model(&messages).
 		Column("id", "subject", "from", "date").
 		Where("to_char(date, 'YYYY-MM') = ?", combinedDate).
-		WhereGroup(func(q *orm.Query) (*orm.Query, error) {
-			q = q.WhereOr(`subject LIKE '[` + listName + `]%'`).
-				WhereOr(`subject LIKE 'Re: [` + listName + `]%'`)
-			return q, nil
-		}).
-		//WhereGroup(func(q *orm.Query) (*orm.Query, error) {
-		//	q = q.WhereOr(`headers::jsonb->>'To' LIKE '%` + listName + `@lists.gentoo.org%'`).
-		//		WhereOr(`headers::jsonb->>'Cc' LIKE '%` + listName + `@lists.gentoo.org%'`).
-		//		WhereOr(`headers::jsonb->>'To' LIKE '%` + listName + `@gentoo.org%'`).
-		//		WhereOr(`headers::jsonb->>'Cc' LIKE '%` + listName + `@gentoo.org%'`)
-		//	return q, nil
-		//}).
+		Where("list = ?", listName).
 		Order("date DESC")
 
 	messagesCount, _ := query.Count()
