@@ -74,6 +74,9 @@ func (m Message) GetAuthorName() string {
 	if err != nil {
 		return ""
 	}
+	if addr.Name == "" {
+		return addr.Address
+	}
 	return addr.Name
 }
 
