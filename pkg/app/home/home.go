@@ -8,7 +8,6 @@ import (
 	"archives/pkg/config"
 	"archives/pkg/database"
 	"archives/pkg/models"
-	"github.com/go-pg/pg/v10/orm"
 	"net/http"
 	"time"
 )
@@ -29,11 +28,7 @@ func ComputeTemplateData() interface{} {
 	for _, mailingList := range config.IndexMailingLists() {
 		var messages []*models.Message
 		database.DBCon.Model(&messages).
-			WhereGroup(func(q *orm.Query) (*orm.Query, error) {
-				q = q.WhereOr(`subject LIKE '[` + mailingList[0] + `]%'`).
-					WhereOr(`subject LIKE 'Re: [` + mailingList[0] + `]%'`)
-				return q, nil
-			}).
+			Where("list = ?", mailingList[0]).
 			Order("date DESC").
 			Limit(5).
 			Select()
