@@ -79,6 +79,20 @@ func IncrementalImport() {
 	fmt.Println("Finished incremental import. Imported " + strconv.Itoa(importedCounter) + " new messages.")
 }
 
+func RecomputeThreads() {
+
+	fmt.Println("Init thread computation...")
+	filepath.Walk(config.MailDirPath(), initImport)
+
+	for _, mail := range mails {
+		insertReferencesToMail(mail.RawReferences, mail.Id, mail.From)
+	}
+
+	fmt.Println("Finished thread computation.")
+}
+
+// utility methods
+
 func fileIsAlreadyPresent(path string, messages []*models.Message) bool {
 	for _, message := range messages {
 		if strings.Contains(strings.TrimRight(path, ",S"), strings.TrimRight(message.Filename, ",S")){

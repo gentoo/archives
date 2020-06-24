@@ -31,6 +31,7 @@ type Message struct {
 
 	// many to many
 	//References []string
+	RawReferences []string `pg:"-"`
 	References []Message `pg:"many2many:message_to_references,joinFK:reference_id"`
 
 	Attachments []Attachment

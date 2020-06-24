@@ -23,6 +23,7 @@ func main() {
 
 	fullImport := flag.Bool("full-import", false, "Start a full import, importing all mails")
 	incrementalImport := flag.Bool("incremental-import", false, "Start a incremental import, importing only new mails")
+	computeThreads := flag.Bool("compute-threads", false, "Recompute the thread references that are used to link messages")
 	serve := flag.Bool("serve", false, "Start serving the web application")
 
 	flag.Parse()
@@ -33,6 +34,10 @@ func main() {
 
 	if *incrementalImport {
 		importer.IncrementalImport()
+	}
+
+	if *computeThreads{
+		importer.RecomputeThreads()
 	}
 
 	if *serve {
