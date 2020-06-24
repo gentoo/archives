@@ -5,7 +5,6 @@ package message
 import (
 	"archives/pkg/database"
 	"archives/pkg/models"
-	"fmt"
 	"net/http"
 	"strings"
 )
@@ -32,7 +31,6 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	var queryParts []string
 	for _, reference := range message.References {
-		fmt.Println("> " + reference.Id)
 		queryParts = append(queryParts, "reference_id = '" + reference.Id + "'")
 	}
 	query := strings.Join(queryParts, " OR ")
@@ -46,7 +44,6 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	// TODO only if len(refs) >= 1
 	var nextQueryParts []string
 	for _, reference := range refs {
-		fmt.Println("> " + reference.MessageId)
 		nextQueryParts = append(nextQueryParts, "id = '" + reference.MessageId + "'")
 	}
 	nextQuery := strings.Join(nextQueryParts, " OR ")
@@ -56,10 +53,6 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		Where(nextQuery).
 		// Where date is newer than message
 		Select()
-
-	fmt.Println("-------------------")
-	fmt.Println(err)
-	fmt.Println(len(replies))
 
 	renderMessageTemplate(w, listName, message, replies)
 }
