@@ -10,7 +10,7 @@ import (
 )
 
 // renderIndexTemplate renders all templates used for the landing page
-func renderMessageTemplate(w http.ResponseWriter, listName string, message *models.Message, inReplyTo *models.Message, replies []*models.Message) {
+func renderMessageTemplate(w http.ResponseWriter, listName string, message *models.Message, replies []*models.Message) {
 	templates := template.Must(
 		template.Must(
 			template.New("Show").
@@ -21,12 +21,10 @@ func renderMessageTemplate(w http.ResponseWriter, listName string, message *mode
 	templateData := struct {
 		ListName  string
 		Message   *models.Message
-		InReplyTo *models.Message
 		Replies   []*models.Message
 	}{
 		ListName:  listName,
 		Message:   message,
-		InReplyTo: inReplyTo,
 		Replies:   replies,
 	}
 

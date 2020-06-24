@@ -39,10 +39,10 @@
                 <td><tt>{{.Message.GetMessageId}}</tt></td>
               </tr>
 
-              {{if .InReplyTo}}
+              {{if .Message.InReplyTo}}
               <tr>
                 <th>In Reply to:</th>
-                <td colspan="3"><a href="/{{.ListName}}/messages/{{.InReplyTo.Id}}">{{.InReplyTo.GetHeaderField "Subject"}}</a> by {{.InReplyTo.GetAuthorName}}</td>
+                <td colspan="3"><a href="/{{.Message.InReplyTo.List}}/messages/{{.Message.InReplyTo.Id}}">{{.Message.InReplyTo.GetSubject}}</a> by {{.Message.InReplyTo.GetAuthorName}}</td>
               </tr>
               {{end}}
 

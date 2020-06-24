@@ -17,26 +17,14 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	messageHash := urlParts[len(urlParts)-1]
 
 	message := &models.Message{Id: messageHash}
-	err := database.DBCon.Select(message)
+	err := database.DBCon.Model(message).
+		Relation("InReplyTo").
+		WherePK().
+		Select()
 
 	if err != nil {
 		http.NotFound(w, r)
 		return
-	}
-
-	var inReplyTos []*models.Message
-	var inReplyTo *models.Message
-	if message.InReplyTo != nil {
-		err = database.DBCon.Model(&inReplyTos).
-			Where(`(headers::jsonb->>'Message-Id')::jsonb ? '` + message.InReplyTo.Id + `'`).
-			Select()
-		if err != nil || len(inReplyTos) < 1 {
-			inReplyTo = nil
-		} else {
-			inReplyTo = inReplyTos[0]
-		}
-	} else {
-		inReplyTo = nil
 	}
 
 	var replies []*models.Message
@@ -45,5 +33,5 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		WhereOr(`(headers::jsonb->>'In-Reply-To')::jsonb ? '` + message.Id + `'`).
 		Order("date ASC").Select()
 
-	renderMessageTemplate(w, listName, message, inReplyTo, replies)
+	renderMessageTemplate(w, listName, message, replies)
 }
