@@ -84,7 +84,14 @@ func RecomputeThreads() {
 	fmt.Println("Init thread computation...")
 	filepath.Walk(config.MailDirPath(), initImport)
 
+	fmt.Println("Import thread references into database...")
+	overallLength := len(mails)
+	counter := 0
 	for _, mail := range mails {
+		if counter % 1000 == 0 {
+			fmt.Println("Imported thread references for " + strconv.Itoa(counter) +  " of " + strconv.Itoa(overallLength) + " mails.")
+		}
+		counter++
 		insertReferencesToMail(mail.RawReferences, mail.Id, mail.From)
 	}
 
