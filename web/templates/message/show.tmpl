@@ -42,7 +42,7 @@
               {{if .Message.InReplyTo}}
               <tr>
                 <th>In Reply to:</th>
-                <td colspan="3"><a href="/{{.Message.InReplyTo.List}}/messages/{{.Message.InReplyTo.Id}}">{{.Message.InReplyTo.GetSubject}}</a> by {{.Message.InReplyTo.GetAuthorName}}</td>
+                <td colspan="3"><a href="/{{.Message.InReplyTo.List}}/message/{{.Message.InReplyTo.Id}}">{{.Message.InReplyTo.GetSubject}}</a> by {{.Message.InReplyTo.GetAuthorName}}</td>
               </tr>
               {{end}}
 
@@ -72,16 +72,27 @@
           {{end}}
 
           {{if .Replies}}
+            <h3>Replies</h3>
             <div class="table-responsive">
               <table class="table table-sm ag-replies-table">
                 <tbody><tr>
                   <th>Subject</th>
                   <th>Author</th>
+                  <th>Date</th>
                 </tr>
-                {{range .Replies}}
+                {{range $index, $reply := .Replies}}
+                  <tr {{if ge $index 5}}class="more-replies d-none"{{end}}>
+                    <td><a href="/{{$reply.List}}/message/{{$reply.Id}}">{{.GetSubject}}</a></td>
+                    <td>{{formatAddr $reply.From}}</td>
+                    <td>{{$reply.Date.Format "2006-01-02 15:04:05"}}</td>
+                  </tr>
+                {{end}}
+                {{ if gt (len .Replies) 5}}
                   <tr>
-                    <td><a href="{{.Id}}">{{.GetSubject}}</a></td>
-                    <td>{{formatAddr .From}}</td>
+                    <td id="show-more-replies" colspan="3" class="text-center"><button class="btn btn-link" type="button">Show more</button></td>
+                  </tr>
+                  <tr>
+                    <td id="show-less-replies" colspan="3" class="text-center d-none"><button class="btn btn-link" type="button">Show less</button></td>
                   </tr>
                 {{end}}
                 </tbody>
