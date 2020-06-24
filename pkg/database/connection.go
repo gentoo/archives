@@ -69,6 +69,8 @@ func Connect() {
 
 	DBCon.AddQueryHook(dbLogger{})
 
+	orm.RegisterTable((*models.MessageToReferences)(nil))
+
 	err := CreateSchema()
 	if err != nil {
 		// logger.Error.Println("ERROR: Could not create database schema")

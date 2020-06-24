@@ -54,7 +54,7 @@ func initImport(path string, info os.FileInfo, err error) error {
 			From:         m.Header.Get("From"),
 			To:           strings.Split(m.Header.Get("To"), ","),
 			Subject:      m.Header.Get("Subject"),
-			MessageId:    m.Header.Get("Message-Id"),
+			MessageIdField:    m.Header.Get("Message-Id"),
 		})
 	}
 	return nil
@@ -83,7 +83,7 @@ func importIntoDatabase(path, filename string, m *mail.Message) {
 	bodyContent, attachments := parseBody(m)
 	msg := models.Message{
 		Id:          m.Header.Get("X-Archives-Hash"),
-		MessageId:   m.Header.Get("Message-Id"),
+		MessageIdField:   m.Header.Get("Message-Id"),
 		Filename:    filename,
 		From:        m.Header.Get("From"),
 		To:          parseAddressList(m.Header.Get("To")),
@@ -127,13 +127,13 @@ func parseAddressList(addressList string) []string {
 func getInReplyToMail(messageId, from string) string {
 	// step 1 TODO add description
 	for _, mail := range mails {
-		if mail.MessageId == messageId && strings.Contains(strings.Join(mail.To, ", "), from) {
+		if mail.MessageId() == messageId && strings.Contains(strings.Join(mail.To, ", "), from) {
 			return mail.Id
 		}
 	}
 	// step 2 TODO add description
 	for _, mail := range mails {
-		if mail.MessageId == messageId {
+		if mail.MessageId() == messageId {
 			return mail.Id
 		}
 	}
@@ -146,13 +146,13 @@ func insertReferencesToMail(references []string, messageId, from string) []*mode
 	for _, reference := range references {
 		// step 1 TODO add description
 		for _, mail := range mails {
-			if mail.MessageId == reference  && strings.Contains(strings.Join(mail.To, ", "), from) {
+			if mail.MessageId() == reference  && strings.Contains(strings.Join(mail.To, ", "), from) {
 				referencesToMail = append(referencesToMail, mail)
 			}
 		}
 		// step 2 TODO add description
 		for _, mail := range mails {
-			if mail.MessageId == reference {
+			if mail.MessageId() == reference {
 				referencesToMail = append(referencesToMail, mail)
 			}
 		}

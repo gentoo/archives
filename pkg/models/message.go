@@ -8,8 +8,10 @@ import (
 )
 
 type Message struct {
+	tableName struct{} `pg:",discard_unknown_columns"`
+
 	Id       string `pg:",pk"`
-	MessageId string
+	MessageIdField string
 	Filename string
 
 	List string
@@ -61,6 +63,10 @@ type MessageToReferences struct {
 	ReferenceId  string
 }
 
+func (m Message) MessageId() string {
+	return m.MessageIdField
+}
+
 func (m Message) GetListNameFromSubject() string {
 	subject := m.Subject
 	listName := strings.Split(subject, "]")[0]
@@ -90,7 +96,7 @@ func (m Message) GetSubject() string {
 }
 
 func (m Message) GetMessageId() string {
-	messageId := m.MessageId
+	messageId := m.MessageIdField
 	messageId = strings.ReplaceAll(messageId, "<", "")
 	messageId = strings.ReplaceAll(messageId, ">", "")
 	messageId = strings.ReplaceAll(messageId, "\"", "")
@@ -98,7 +104,7 @@ func (m Message) GetMessageId() string {
 }
 
 func (m Message) GetInReplyTo() string {
-	inReplyTo := m.InReplyTo.MessageId
+	inReplyTo := m.InReplyTo.MessageIdField
 	inReplyTo = strings.ReplaceAll(inReplyTo, "<", "")
 	inReplyTo = strings.ReplaceAll(inReplyTo, ">", "")
 	inReplyTo = strings.ReplaceAll(inReplyTo, " ", "")
