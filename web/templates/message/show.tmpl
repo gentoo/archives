@@ -80,8 +80,8 @@
                 </tr>
                 {{range .Replies}}
                   <tr>
-                    <td><a href="{{.Id}}">{{.GetHeaderField "Subject"}}</a></td>
-                    <td>{{formatAddr (.GetHeaderField "From")}}</td>
+                    <td><a href="{{.Id}}">{{.GetSubject}}</a></td>
+                    <td>{{formatAddr .From}}</td>
                   </tr>
                 {{end}}
                 </tbody>
