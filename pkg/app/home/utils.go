@@ -27,7 +27,7 @@ func getAllMessagesCount() int {
 	var messsageCount int
 	database.DBCon.Model((*models.Message)(nil)).QueryOne(pg.Scan(&messsageCount), `
 		SELECT
-			count(DISTINCT messages.message_id)
+			count(DISTINCT messages.message_id_field)
 		FROM
 			messages;
 	`)
