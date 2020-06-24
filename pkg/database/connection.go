@@ -19,17 +19,17 @@ var (
 // CreateSchema creates the tables in the database
 // in case they don't alreay exist
 func CreateSchema() error {
+
+	//
+	// Message
+	//
 	if !tableExists("messages") {
 
-		for _, model := range []interface{}{(*models.Message)(nil),
-			(*models.MessageToReferences)(nil)} {
-
-			err := DBCon.CreateTable(model, &orm.CreateTableOptions{
-				IfNotExists: true,
-			})
-			if err != nil {
-				return err
-			}
+		err := DBCon.CreateTable((*models.Message)(nil), &orm.CreateTableOptions{
+			IfNotExists: true,
+		})
+		if err != nil {
+			return err
 		}
 
 		// Add tsvector column for subjects
@@ -42,6 +42,19 @@ func CreateSchema() error {
 
 		return nil
 	}
+
+	//
+	// MessageToReference
+	//
+	if !tableExists("message_to_references") {
+		err := DBCon.CreateTable((*models.MessageToReferences)(nil), &orm.CreateTableOptions{
+			IfNotExists: true,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
