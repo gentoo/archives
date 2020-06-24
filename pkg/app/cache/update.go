@@ -4,6 +4,7 @@ import (
 	"archives/pkg/app/home"
 	"archives/pkg/app/list"
 	"archives/pkg/app/popular"
+	"archives/pkg/app/recent"
 	"archives/pkg/cache"
 	"archives/pkg/config"
 	"fmt"
@@ -26,6 +27,10 @@ func Update(){
 	startTime := time.Now()
 	cache.Put("/", home.ComputeTemplateData())
 	fmt.Println("> Updated '/' in " + time.Now().Sub(startTime).String())
+
+	startTime = time.Now()
+	cache.Put("/recent", recent.ComputeTemplateData())
+	fmt.Println("> Updated '/recent' in " + time.Now().Sub(startTime).String())
 
 	startTime = time.Now()
 	cache.Put("/lists", list.ComputeBrowseTemplateData())

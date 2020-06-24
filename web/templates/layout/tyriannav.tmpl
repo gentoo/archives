@@ -9,9 +9,10 @@
             <div class="collapse navbar-collapse navbar-main-collapse" id="navbar-main-collapse">
                 <ul class="navbar-nav mr-auto">
 
-                    <li class="nav-item {{ if (eq . "home")}}active{{end}}"><a class="nav-link" href="/">Home</a></li>
-                    <li class="nav-item {{ if (eq . "browse")}}active{{end}}"><a class="nav-link" href="/lists"><i class="fa fa-fw fa-archive"></i> All Archives</a></li>
-                    {{ if not (eq . "home" "search" "browse" "popular") }}
+                    <li class="nav-item {{ if (eq . "home" "search")}}active{{end}}"><a class="nav-link" href="/">Search</a></li>
+                    <li class="nav-item {{ if (eq . "recent")}}active{{end}}"><a class="nav-link" href="/recent">Recent</a></li>
+                    <li class="nav-item {{ if (eq . "browse")}}active{{end}}"><a class="nav-link" href="/lists"><i class="fa fa-fw fa-archive"></i> Browse</a></li>
+                    {{ if not (eq . "home" "search" "recent" "browse" "popular") }}
                     <li class="nav-item active"><a class="nav-link" href="/{{.}}/"><i class="fa fa-fw fa-inbox"></i> {{.}}</a></li>
                     {{end}}
 

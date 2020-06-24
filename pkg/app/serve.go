@@ -8,6 +8,7 @@ import (
 	"archives/pkg/app/list"
 	"archives/pkg/app/message"
 	"archives/pkg/app/popular"
+	"archives/pkg/app/recent"
 	"archives/pkg/app/search"
 	"archives/pkg/config"
 	"fmt"
@@ -36,6 +37,8 @@ func Serve() {
 	setRoute("/popular", popular.Threads)
 
 	setRoute("/search", search.Search)
+
+	setRoute("/recent", recent.Show)
 
 	setRoute("/", home.Show)
 

@@ -4,10 +4,6 @@
 <body>
 {{template "header" "home"}}
 
-<div id="scroll-down-section" class="text-muted" style="z-index: 9999;">
-    <br/><br/>
-    <i onclick="document.getElementById('lists-section').scrollIntoView(true);" class="fa fa-angle-down" aria-hidden="true"></i>
-</div>
 
 <div class="container mb-5">
     <div class="row">
@@ -52,59 +48,6 @@
 
         </div>
 
-        <div id="lists-section" class="col-12 pt-3">
-            <p class="lead">
-              Here you can find the archives of our most important mailing lists.
-            </p>
-            <p>
-              For a complete list of available archives, see the <a href="/lists" class="btn btn-primary btn-sm px-1 py-0"><i class="fa fa-fw fa-archive"></i> All Archives</a> section.
-            </p>
-        </div>
-
-        <div class="col-12">
-            {{range .MailingLists}}
-                <hr/>
-                <div class="row">
-                    <div class="col-12 col-md-4">
-                        <h2 class="stick-top">{{.Name}}</h2>
-                        <p>
-                            <tt>{{.Name}}</tt> {{.Description}}.
-                        </p>
-                        <p class="ag-index-actions">
-                            <a class="btn btn-primary btn-block" href="/{{.Name}}/threads/{{ $.CurrentMonth}}/"><span class="fa fa-fw fa-inbox"></span> This Month's Archives</a>
-                            <a class="btn btn-outline-secondary text-dark btn-block" href="/{{.Name}}/"><span class="fa fa-fw fa-inbox"></span> Complete Archives</a>
-                        </p>
-                    </div>
-                    <div class="col-12 col-md-8">
-                        <h3 class="ag-mostrecent-header">Most recent messages</h3>
-                        <div class="table-responsive">
-                            <table class="table table-sm table-hover ag-mostrecent-table">
-                                <tbody>
-                                    <tr>
-                                        <th>Subject</th>
-                                        <th class="ag-mostrecent-table-author">Author</th>
-                                    </tr>
-                                    {{$listName:=.Name}}
-                                    {{range .Messages}}
-                                        <tr>
-                                            <td><a href="/{{$listName}}/message/{{.Id}}">{{.GetSubject}}</a></td>
-                                            <td>{{.GetAuthorName}}</td>
-                                        </tr>
-                                    {{end}}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            {{end}}
-
-            <hr/>
-            <h2>Other Lists</h2>
-            <p>
-                All other archives are available here: <a href="/lists" class="btn btn-primary"><i class="fa fa-fw fa-archive"></i> All Archives</a>
-            </p>
-
-        </div>
     </div>
 </div>
 

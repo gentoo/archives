@@ -5,8 +5,6 @@ package home
 import (
 	"archives/pkg/app/popular"
 	"archives/pkg/cache"
-	"archives/pkg/config"
-	"archives/pkg/database"
 	"archives/pkg/models"
 	"archives/pkg/utils"
 	"net/http"
@@ -25,23 +23,6 @@ func Show(w http.ResponseWriter, r *http.Request) {
 }
 
 func ComputeTemplateData() interface{} {
-	var mailingLists []models.MailingList
-
-	for _, mailingList := range config.IndexMailingLists() {
-		var messages []*models.Message
-		database.DBCon.Model(&messages).
-			Where("list = ?", mailingList[0]).
-			Where("not date is null").
-			Order("date DESC").
-			Limit(5).
-			Select()
-
-		mailingLists = append(mailingLists, models.MailingList{
-			Name:        mailingList[0],
-			Description: mailingList[1],
-			Messages:    messages,
-		})
-	}
 
 	//
 	// Get popular threads
@@ -55,12 +36,10 @@ func ComputeTemplateData() interface{} {
 	}
 
 	return struct {
-		MailingLists   []models.MailingList
 		PopularThreads []*models.Message
 		MessageCount   string
 		CurrentMonth   string
 	}{
-		MailingLists:   mailingLists,
 		PopularThreads: popularThreads,
 		MessageCount:   utils.FormatMessageCount(strconv.Itoa(getAllMessagesCount())),
 		CurrentMonth:   time.Now().Format("2006-01"),
